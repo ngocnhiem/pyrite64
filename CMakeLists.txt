@@ -22,10 +22,13 @@ set(IMGUI_SRC
         vendored/imgui/imgui_draw.cpp
         vendored/imgui/imgui_tables.cpp
         vendored/imgui/imgui_widgets.cpp
-        )
+)
 
 # Create your game executable target as usual
-add_executable(p64editor main.cpp ${IMGUI_SRC})
+add_executable(p64editor src/main.cpp ${IMGUI_SRC}
+        src/editor/editorScene.h
+        src/editor/editorScene.cpp
+)
 
 target_include_directories(p64editor PRIVATE vendored/imgui)
 
