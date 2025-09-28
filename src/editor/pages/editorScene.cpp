@@ -51,18 +51,18 @@ void Editor::Scene::draw()
     ImGui::DockBuilderAddNode(dockSpaceID); // Add empty node
     ImGui::DockBuilderSetNodeSize(dockSpaceID, ImGui::GetMainViewport()->Size);
 
-    auto dockLeftID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Left, 0.25f, nullptr, &dockSpaceID);
+    auto dockLeftID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Left, 0.15f, nullptr, &dockSpaceID);
     auto dockRightID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Right, 0.25f, nullptr, &dockSpaceID);
     auto dockBottomID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Down, 0.25f, nullptr, &dockSpaceID);
 
     ImGui::DockBuilderDockWindow("Project", dockLeftID);
-    ImGui::DockBuilderDockWindow("Viewport", dockSpaceID);
+    ImGui::DockBuilderDockWindow("3D-Viewport", dockSpaceID);
     ImGui::DockBuilderDockWindow("Inspector", dockRightID);
     ImGui::DockBuilderDockWindow("Assets", dockBottomID);
     ImGui::DockBuilderFinish(dockSpaceID);
   }
 
-  ImGui::Begin("Viewport");
+  ImGui::Begin("3D-Viewport");
     viewport3d.draw();
   ImGui::End();
 
