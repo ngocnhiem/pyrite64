@@ -83,6 +83,9 @@ add_executable(p64editor src/main.cpp
         src/build/projectBuilder.cpp
         src/utils/fs.h
         src/utils/string.h
+        src/utils/proc.h
+        src/utils/proc.cpp
+        src/build/sceneBuilder.cpp
 )
 
 target_include_directories(p64editor PRIVATE

@@ -6,6 +6,7 @@
 
 #include <filesystem>
 #include "../utils/fs.h"
+#include "../utils/proc.h"
 #include "../utils/string.h"
 #include "../utils/textureFormats.h"
 
@@ -103,6 +104,18 @@ bool Build::buildProject(Project::Project &project) {
   auto enginePath = fs::current_path() / "n64" / "engine";
   enginePath = fs::absolute(enginePath);
 
+  auto fsDataPath = fs::absolute(fs::path{path} / "filesystem" / "p64");
+  if (!fs::exists(fsDataPath)) {
+    fs::create_directories(fsDataPath);
+  }
+
+  // Scenes
+  project.getScenes().reload();
+  const auto &scenes = project.getScenes().getEntries();
+  for (const auto &scene : scenes) {
+    buildScene(project, scene);
+  }
+
   // Makefile
   auto makefile = Utils::FS::loadTextFile("data/build/baseMakefile.mk");
 
@@ -112,7 +125,18 @@ bool Build::buildProject(Project::Project &project) {
   makefile = Utils::replaceAll(makefile, "{{PROJECT_NAME}}", project.conf.name);
   makefile = Utils::replaceAll(makefile, "{{RULES_ASSETS}}", genAssetRules(project));
 
-  Utils::FS::saveTextFile(path + "/Makefile", makefile);
+  auto oldMakefile = Utils::FS::loadTextFile(path + "/Makefile");
+  if (oldMakefile != makefile) {
+    printf("Makefile changed, clean build\n");
+
+    Utils::FS::saveTextFile(path + "/Makefile", makefile);
+    auto res = Utils::Proc::runSync("make -C \"" + path + "\" clean");
+    printf("Make-Clean: %s\n", res.c_str());
+  }
+
+  // Build
+  auto res = Utils::Proc::runSync("make -C \"" + path + "\" -j8");
+  printf("Make: %s\n", res.c_str());
 
   return true;
 }

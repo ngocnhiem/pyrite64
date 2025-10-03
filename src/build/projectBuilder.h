@@ -7,5 +7,6 @@
 
 namespace Build
 {
+  void buildScene(Project::Project &project, const Project::SceneEntry &scene);
   bool buildProject(Project::Project &project);
 }

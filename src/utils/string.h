@@ -26,4 +26,8 @@ namespace Utils
     return result;
   }
 
+  inline std::string padLeft(const std::string &str, char padChar, size_t totalLength) {
+    if(str.length() >= totalLength)return str;
+    return std::string(totalLength - str.length(), padChar) + str;
+  }
 }

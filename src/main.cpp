@@ -1,3 +1,7 @@
+/**
+* @copyright 2025 - Max Bebök
+* @license MIT
+*/
 #include "context.h"
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
@@ -14,6 +18,7 @@
 #include "renderer/shader.h"
 #include "SDL3_image/SDL_image.h"
 #include "utils/filePicker.h"
+#include "utils/proc.h"
 
 constinit Context ctx{};
 
@@ -128,6 +133,14 @@ int main(int, char**)
       }
       return false;
     });
+    Editor::Actions::registerAction(Editor::Actions::Type::GAME_RUN, [](const std::string&) {
+      if (!ctx.project)return false;
+      auto cmd = ctx.project->conf.pathEmu + " " + ctx.project->getPath() + "/" + ctx.project->conf.romName + ".z64";
+      printf("Running command: %s\n", cmd.c_str());
+      auto res = Utils::Proc::runSync(cmd);
+      printf("Run result: %s\n", res.c_str());
+      return true;
+    });
 
     // TEST:
     Editor::Actions::call(Editor::Actions::Type::PROJECT_OPEN, "/home/mbeboek/Documents/projects/pyrite64/n64/examples/hello_world");
@@ -138,6 +151,7 @@ int main(int, char**)
     Editor::Scene editorScene{};
 
     Editor::Actions::call(Editor::Actions::Type::PROJECT_BUILD);
+    //Editor::Actions::call(Editor::Actions::Type::GAME_RUN);
 
     // Main loop
     bool done = false;
@@ -159,8 +173,13 @@ int main(int, char**)
             if (ctx.project)ctx.project->save();
           }
 
+          if (!(event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_F11) {
+            Editor::Actions::call(Editor::Actions::Type::PROJECT_BUILD);
+          }
+
           if (!(event.key.mod & SDL_KMOD_CTRL) && event.key.key == SDLK_F12) {
             Editor::Actions::call(Editor::Actions::Type::PROJECT_BUILD);
+            Editor::Actions::call(Editor::Actions::Type::GAME_RUN);
           }
         }
         // Check: io.WantCaptureMouse, io.WantCaptureKeyboard
