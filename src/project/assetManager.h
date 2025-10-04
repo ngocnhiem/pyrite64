@@ -38,6 +38,7 @@ namespace Project
         int baseScale{0};
         bool gltfBVH{0};
         ComprTypes compression{ComprTypes::DEFAULT};
+        bool exclude{false};
 
         std::string serialize() const;
       };

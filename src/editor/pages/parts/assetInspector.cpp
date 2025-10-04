@@ -52,6 +52,8 @@ void Editor::AssetInspector::draw() {
     ImGui::InpTable::addComboBox("Compression", idxCompr, ComprItems, 5);
     asset->conf.compression = static_cast<Project::ComprTypes>(idxCompr);
 
+    ImGui::InpTable::addCheckBox("Exclude", asset->conf.exclude);
+
     ImGui::InpTable::end();
   }
 

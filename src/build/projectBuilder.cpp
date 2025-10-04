@@ -50,6 +50,7 @@ namespace
     std::string rulePath{};
     for (const auto &entry : entries)
     {
+      if (entry.conf.exclude)continue;
       auto comprLevel = std::to_string(getComprLevel(entry.conf.compression));
       auto romPath = getAssetROMPath(entry.path, projectBase);
 

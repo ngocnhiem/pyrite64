@@ -12,7 +12,6 @@
 #include "lib/logger.h"
 #include "lib/matrixManager.h"
 #include "lib/assetManager.h"
-#include "actor/actorTable.h"
 #include "audio/audioManager.h"
 #include "../audio/audioManagerPrivate.h"
 
@@ -71,10 +70,11 @@ P64::Scene::~Scene()
 }
 
 void P64::Scene::addActor(uint16_t type, P64::Actor::Base::Args *args) {
-  auto newActor = Actor::createActor(type, args);
+  /*auto newActor = Actor::createActor(type, args);
   if(newActor) {
     actors.push_back(newActor);
-  }
+  }*/
+  debugf("@TODO: addActor\n");
 }
 
 void P64::Scene::update(float deltaTime) {

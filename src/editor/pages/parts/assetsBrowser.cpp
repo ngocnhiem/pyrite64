@@ -61,7 +61,9 @@ void Editor::AssetsBrowser::draw()
     }
 
     if (ImGui::ImageButton(asset.name.c_str(), icon,
-      {imageSize, imageSize}, {0,0}, {1,1}, {0,0,0,0}, {1,1,1,1}
+      {imageSize, imageSize}, {0,0}, {1,1}, {0,0,0,0}, {1,1,1,
+        asset.conf.exclude ? 0.25f : 1.0f
+      }
     )) {
       ctx.selAssetUUID = asset.uuid == ctx.selAssetUUID ? 0 : asset.uuid;
     }

@@ -25,6 +25,8 @@ std::string Project::AssetManager::AssetConf::serialize() const {
   builder.append_key_value<"compression">(static_cast<int>(compression));
   builder.append_comma();
   builder.append_key_value<"gltfBVH">(gltfBVH);
+  builder.append_comma();
+  builder.append_key_value<"exclude">(exclude);
   builder.end_object();
   return {builder.c_str()};
 }
@@ -76,6 +78,7 @@ void Project::AssetManager::reload() {
           JSON_GET_INT(baseScale);
           JSON_GET_INT(compression);
           JSON_GET_BOOL(gltfBVH);
+          JSON_GET_BOOL(exclude);
         }
       }
 
