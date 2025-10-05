@@ -10,25 +10,20 @@
 #include "../utils/fs.h"
 #include "../utils/hash.h"
 #include "../utils/json.h"
+#include "../utils/jsonBuilder.h"
 
 namespace
 {
 }
 
 std::string Project::AssetManager::AssetConf::serialize() const {
-  simdjson::builder::string_builder builder{};
-  builder.start_object();
-  builder.append_key_value<"format">(format);
-  builder.append_comma();
-  builder.append_key_value<"baseScale">(baseScale);
-  builder.append_comma();
-  builder.append_key_value<"compression">(static_cast<int>(compression));
-  builder.append_comma();
-  builder.append_key_value<"gltfBVH">(gltfBVH);
-  builder.append_comma();
-  builder.append_key_value<"exclude">(exclude);
-  builder.end_object();
-  return {builder.c_str()};
+  Utils::JSON::Builder builder{};
+  builder.set("format", format);
+  builder.set("baseScale", baseScale);
+  builder.set("compression", static_cast<int>(compression));
+  builder.set("gltfBVH", gltfBVH);
+  builder.set("exclude", exclude);
+  return builder.toString();
 }
 
 void Project::AssetManager::reload() {

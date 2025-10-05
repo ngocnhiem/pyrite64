@@ -1,4 +1,10 @@
 {
-"conf": {"name":"Scene A","fbWidth":320,"fbHeight":240,"fbFormat":0,"clearColor":[0.9798387289047241,0.28051838278770447,0.28051838278770447,1.0],"doClearColor":true,"doClearDepth":true},
+"conf": {"name":"Scene A"
+,"fbWidth":320
+,"fbHeight":240
+,"fbFormat":0
+,"clearColor":[0.28051844239234924,0.5737816691398621,0.9798387289047241,1.0],"doClearColor":true
+,"doClearDepth":true
+},
 "graph": {}
 }

@@ -26,9 +26,31 @@ namespace Utils::JSON
         hasData = true;
       }
 
+      void set(const std::string &key, const Color &col) {
+        if (hasData)builder.append_comma();
+
+        builder.escape_and_append_with_quotes(key);
+        builder.append_colon();
+        builder.start_array();
+          builder.append(col.r); builder.append_comma();
+          builder.append(col.g); builder.append_comma();
+          builder.append(col.b); builder.append_comma();
+          builder.append(col.a);
+        builder.end_array();
+
+        hasData = true;
+      }
+
+      void set(const std::string &key, Builder &build) {
+        if (hasData)builder.append_comma();
+        builder.escape_and_append_with_quotes(key);
+        builder.append_colon();
+        builder.append_raw(build.toString());
+        hasData = true;
+      }
+
       std::string toString() {
-        builder.end_object();
-        return {builder.c_str()};
+        return std::string{builder.c_str()} + "}";
       }
   };
 }

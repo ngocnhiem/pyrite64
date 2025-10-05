@@ -10,6 +10,7 @@
 #include "../../utils/json.h"
 #include "../../context.h"
 #include "../../utils/hash.h"
+#include "../../utils/jsonBuilder.h"
 
 namespace
 {
@@ -22,32 +23,16 @@ namespace
 }
 
 std::string Project::SceneConf::serialize() const {
-  simdjson::builder::string_builder builder{};
-  builder.start_object();
-  builder.append_key_value<"name">(name);
-  builder.append_comma();
-  builder.append_key_value<"fbWidth">(fbWidth);
-  builder.append_comma();
-  builder.append_key_value<"fbHeight">(fbHeight);
-  builder.append_comma();
-  builder.append_key_value<"fbFormat">(fbFormat);
-  builder.append_comma();
 
-  builder.escape_and_append_with_quotes("clearColor");
-  builder.append_colon();
-  builder.start_array();
-    builder.append(clearColor.r); builder.append_comma();
-    builder.append(clearColor.g); builder.append_comma();
-    builder.append(clearColor.b); builder.append_comma();
-    builder.append(clearColor.a);
-  builder.end_array();
-  builder.append_comma();
-
-  builder.append_key_value<"doClearColor">(doClearColor);
-  builder.append_comma();
-  builder.append_key_value<"doClearDepth">(doClearDepth);
-  builder.end_object();
-  return {builder.c_str()};
+  Utils::JSON::Builder builder{};
+  builder.set("name", name);
+  builder.set("fbWidth", fbWidth);
+  builder.set("fbHeight", fbHeight);
+  builder.set("fbFormat", fbFormat);
+  builder.set("clearColor", clearColor);
+  builder.set("doClearColor", doClearColor);
+  builder.set("doClearDepth", doClearDepth);
+  return builder.toString();
 }
 
 Project::Scene::Scene(int id_)
