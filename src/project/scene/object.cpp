@@ -48,12 +48,7 @@ void Project::Object::deserialize(Scene &scene, const simdjson::simdjson_result<
   size_t childCount = chArray.size();
   for (size_t i=0; i<childCount; ++i) {
     auto childObj = std::make_shared<Object>(*this);
-
-    //this->children.push_back(childObj);
-    printf("BEFORE Add child %s to %s (ch: %d)\n", childObj->name.c_str(), name.c_str(), childObj->children.size());
     childObj->deserialize(scene, chArray.at(i));
-    printf("Add child %s to %s (ch: %d)\n", childObj->name.c_str(), name.c_str(), childObj->children.size());
-
     scene.addObject(*this, childObj);
   }
 }

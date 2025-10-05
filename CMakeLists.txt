@@ -11,6 +11,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O2")
 
 add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
 add_subdirectory(vendored/SDL_image EXCLUDE_FROM_ALL)
+add_subdirectory(vendored/glm EXCLUDE_FROM_ALL)
 
 # Create your game executable target as usual
 add_executable(p64editor src/main.cpp
@@ -109,7 +110,8 @@ target_include_directories(p64editor PRIVATE
     vendored/IconFontCppHeaders
     vendored/SHA256/include
     vendored/ImGuiTextSelect
+    vendored/glm
 )
 
 # Link to the actual SDL3 library.
-target_link_libraries(p64editor PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
+target_link_libraries(p64editor PRIVATE SDL3::SDL3 SDL3_image::SDL3_image glm::glm)

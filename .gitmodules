@@ -10,3 +10,6 @@
 [submodule "vendored/SHA256"]
 	path = vendored/SHA256
 	url = https://github.com/System-Glitch/SHA256.git
+[submodule "vendored/glm"]
+	path = vendored/glm
+	url = https://github.com/g-truc/glm.git
