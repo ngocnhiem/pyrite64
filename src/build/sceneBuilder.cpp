@@ -20,7 +20,6 @@ namespace
 
 void Build::buildScene(Project::Project &project, const Project::SceneEntry &scene, SceneCtx &ctx)
 {
-  printf(" - Scene %d: %s\n", scene.id, scene.name.c_str());
   std::string fileNameScene = "s" + Utils::padLeft(std::to_string(scene.id), '0', 4);
   std::string fileNameStr = fileNameScene + "s";
 

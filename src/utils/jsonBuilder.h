@@ -83,24 +83,41 @@ namespace Utils::JSON
         hasData = true;
       }
 
-      void set(const std::string &key, std::vector<Builder> &build) {
+      void setRaw(const std::string &key, const std::vector<std::string> &parts) {
         if (hasData)builder.append_comma();
         builder.escape_and_append_with_quotes(key);
         builder.append_colon();
         builder.start_array();
 
         bool needsComma = false;
-        for (auto &child : build) {
+        for (auto &part : parts) {
           if (needsComma) {
             builder.append_comma();
             builder.append_raw("\n");
           }
-          builder.append_raw(child.toString());
+          builder.append_raw(part);
           needsComma = true;
         }
         builder.end_array();
 
         hasData = true;
+      }
+
+      void setRaw(const std::string &key, const std::string &part) {
+        if (hasData)builder.append_comma();
+        builder.escape_and_append_with_quotes(key);
+        builder.append_colon();
+        builder.append_raw(part);
+        builder.append_raw("\n");
+        hasData = true;
+      }
+
+      void set(const std::string &key, std::vector<Builder> &build) {
+        std::vector<std::string> parts{};
+        for (auto &child : build) {
+          parts.push_back(child.toString());
+        }
+        setRaw(key, parts);
       }
 
       std::string toString() {

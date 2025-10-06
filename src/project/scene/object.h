@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "simdjson.h"
+#include "../component/components.h"
 #include "glm/vec3.hpp"
 #include "glm/gtc/quaternion.hpp"
 
@@ -30,9 +31,12 @@ namespace Project
       glm::vec3 scale{};
 
       std::vector<std::shared_ptr<Object>> children{};
+      std::vector<Component::Entry> components{};
 
       explicit Object(Object& parent) : parent{&parent} {}
       Object() = default;
+
+      void addComponent(int compID);
 
       std::string serialize();
       void deserialize(Scene &scene, const simdjson::simdjson_result<simdjson::dom::element> &doc);

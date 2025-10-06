@@ -102,6 +102,9 @@ add_executable(p64editor src/main.cpp
         src/project/scene/object.cpp
         src/editor/pages/parts/objectInspector.cpp
         src/utils/jsonBuilder.h
+        src/project/component/components.h
+        src/project/component/components.cpp
+        src/project/component/types/compCode.cpp
 )
 
 target_include_directories(p64editor PRIVATE

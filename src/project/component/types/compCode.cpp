@@ -1,0 +1,46 @@
+/**
+* @copyright 2025 - Max Bebök
+* @license MIT
+*/
+#include "../components.h"
+#include "../../../editor/imgui/helper.h"
+#include "../../../utils/json.h"
+#include "../../../utils/jsonBuilder.h"
+
+namespace Project::Component::Code
+{
+  struct Data
+  {
+    uint64_t scriptUUID{0};
+  };
+
+  std::shared_ptr<void> init(Object &obj) {
+    auto data = std::make_shared<Data>();
+    return data;
+  }
+
+  std::string serialize(Entry &entry) {
+    Data &data = *static_cast<Data*>(entry.data.get());
+    Utils::JSON::Builder builder{};
+    builder.set("script", data.scriptUUID);
+    return builder.toString();
+  }
+
+  std::shared_ptr<void> deserialize(simdjson::simdjson_result<simdjson::dom::object> &doc) {
+    auto data = std::make_shared<Data>();
+    data->scriptUUID = doc["script"].get<uint64_t>();
+    return data;
+  }
+
+  void draw(Object &obj, Entry &entry)
+  {
+    Data &data = *static_cast<Data*>(entry.data.get());
+
+    if (ImGui::InpTable::start("Comp")) {
+      ImGui::InpTable::addString("Name", entry.name);
+      ImGui::InpTable::add("Script");
+      ImGui::InputScalar("##UUID", ImGuiDataType_U64, &data.scriptUUID);
+      ImGui::InpTable::end();
+    }
+  }
+}

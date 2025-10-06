@@ -23,6 +23,17 @@ namespace
     builder.set("rot", obj.rot);
     builder.set("scale", obj.scale);
 
+    std::vector<Builder> comps{};
+    for (auto &comp : obj.components) {
+      auto &def = Project::Component::TABLE[comp.id];
+      comps.push_back({});
+      Builder &builderCom = comps.back();
+      builderCom.set("id", comp.id);
+      builderCom.set("name", comp.name);
+      builderCom.setRaw("data", def.funcSerialize(comp));
+    }
+    builder.set("components", comps);
+
     std::vector<Builder> children{};
     for (const auto &child : obj.children) {
       children.push_back(serializeObj(*child));
@@ -30,6 +41,17 @@ namespace
     builder.set("children", children);
     return builder;
   }
+}
+
+void Project::Object::addComponent(int compID) {
+  if (compID < 0 || compID >= static_cast<int>(Component::TABLE.size()))return;
+  auto &def = Component::TABLE[compID];
+
+  components.push_back({
+    .id = compID,
+    .name = std::string{def.name},
+    .data = def.funcInit(*this)
+  });
 }
 
 std::string Project::Object::serialize() {
@@ -47,6 +69,28 @@ void Project::Object::deserialize(Scene &scene, const simdjson::simdjson_result<
   pos = Utils::JSON::readVec3(doc, "pos");
   rot = Utils::JSON::readQuat(doc, "rot");
   scale = Utils::JSON::readVec3(doc, "scale", {1,1,1});
+
+  auto cmArray = doc["components"].get_array();
+  if (cmArray.error() == simdjson::SUCCESS) {
+    int count = cmArray.size();
+    for (int i=0; i<count; ++i) {
+      auto compObj = cmArray.at(i);
+      if (compObj.error() != simdjson::SUCCESS)continue;
+
+      auto id = Utils::JSON::readInt(compObj, "id");
+      if (id < 0 || id >= static_cast<int>(Component::TABLE.size()))continue;
+      auto &def = Component::TABLE[id];
+
+      auto data = compObj["data"].get_object();
+
+      components.push_back({
+        .id = id,
+        .name = Utils::JSON::readString(compObj, "name"),
+        .data = def.funcDeserialize(data)
+      });
+
+    }
+  }
 
   auto ch = doc["children"];
   if (ch.error() != simdjson::SUCCESS)return;

@@ -7,6 +7,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "../../imgui/helper.h"
 #include "../../../context.h"
+#include "../../../project/component/components.h"
 
 Editor::ObjectInspector::ObjectInspector() {
 }
@@ -52,10 +53,33 @@ void Editor::ObjectInspector::draw() {
     }
   }
 
-  if (ImGui::CollapsingHeader("Components", ImGuiTreeNodeFlags_DefaultOpen)) {
-    // center button
-    const char* addLabel = ICON_FA_PLUS_SQUARE " Add Component";
-    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize(addLabel).x) * 0.5f - 4);
-    ImGui::Button(addLabel);
+  for (auto &comp : obj->components)
+  {
+    ImGui::PushID(&comp);
+
+    auto &def = Project::Component::TABLE[comp.id];
+    auto name = std::string{def.icon} + "  " + comp.name;
+    if (ImGui::CollapsingHeader(name.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+      def.funcDraw(*obj, comp);
+    }
+    ImGui::PopID();
+  }
+
+  const char* addLabel = ICON_FA_PLUS_SQUARE " Add Component";
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4);
+  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize(addLabel).x) * 0.5f - 4);
+  if (ImGui::Button(addLabel)) {
+    ImGui::OpenPopup("CompSelect");
+  }
+
+  if (ImGui::BeginPopupContextItem("CompSelect"))
+  {
+    for (auto &comp : Project::Component::TABLE) {
+      auto name = std::string{comp.icon} + " " + comp.name;
+      if(ImGui::MenuItem(name.c_str())) {
+        obj->addComponent(comp.id);
+      }
+    }
+    ImGui::EndPopup();
   }
 }

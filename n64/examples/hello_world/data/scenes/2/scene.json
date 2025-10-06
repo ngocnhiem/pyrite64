@@ -1,10 +1,13 @@
 {
-"conf": {"name":"Scene B"
-,"fbWidth":320
-,"fbHeight":240
-,"fbFormat":0
-,"clearColor":[0.0,0.0,0.0,1.0],"doClearColor":true
-,"doClearDepth":true
-},
-"graph": {}
+"conf": {"name":"Scene B",
+"fbWidth":320,
+"fbHeight":240,
+"fbFormat":0,"clearColor":[0.0,0.0,0.0,1.0],
+"doClearColor":true,
+"doClearDepth":true},
+"graph": {"id":0,
+"name":"",
+"uuid":0,"pos":[0.0,0.0,0.0],"rot":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0],"components":[],"children":[{"id":1,
+"name":"New Object (1)",
+"uuid":13219253809344067950,"pos":[0.0,0.0,0.0],"rot":[0.0,0.0,0.0,0.0],"scale":[0.0,0.0,0.0],"components":[],"children":[]}]}
 }
