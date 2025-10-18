@@ -14,7 +14,9 @@
 #include "../utils/json.h"
 #include "../utils/jsonBuilder.h"
 #include "../utils/logger.h"
+#include "../utils/meshGen.h"
 #include "../utils/string.h"
+#include "../utils/mesh/gltf.h"
 #include "tiny3d/tools/gltf_importer/src/parser.h"
 
 namespace
@@ -76,11 +78,12 @@ void Project::AssetManager::reload() {
       };
 
       if (type == FileType::IMAGE && ctx.window) {
-        entry.texture = new Renderer::Texture{ctx.gpu, path.string()};
+        entry.texture = std::make_shared<Renderer::Texture>(ctx.gpu, path.string());
       }
       if (type == FileType::MODEL_3D) {
         try {
           entry.t3dmData = parseGLTF(path.string().c_str(), 64.0f);
+          Utils::Mesh::t3dmToMesh(entry.t3dmData, entry.mesh3D);
         } catch (...) {
           Utils::Logger::log("Failed to load 3D model asset: " + path.string());
         }

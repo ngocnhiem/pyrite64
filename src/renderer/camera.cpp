@@ -24,9 +24,8 @@ void Renderer::Camera::update() {
 
 void Renderer::Camera::apply(UniformGlobal &uniGlobal)
 {
-  float x = SDL_GetTicks() / 1000.0f;
   float aspect = screenSize.x / screenSize.y;
-  uniGlobal.projMat = glm::perspective(glm::radians(70.0f), aspect, 0.1f, 100.0f);
+  uniGlobal.projMat = glm::perspective(glm::radians(70.0f), aspect, 0.01f, 100.0f);
 
   const glm::vec3 direction = glm::normalize(rot * WORLD_FORWARD);
   const glm::vec3 dynamicUp = glm::normalize(rot * WORLD_UP);

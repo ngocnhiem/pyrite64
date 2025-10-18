@@ -3,6 +3,9 @@
 * @license MIT
 */
 #include "meshGen.h"
+
+#include <cmath>
+
 #include "../renderer/mesh.h"
 
 void Utils::Mesh::generateCube(Renderer::Mesh&mesh, float size) {
@@ -25,10 +28,16 @@ void Utils::Mesh::generateCube(Renderer::Mesh&mesh, float size) {
 
     uint16_t startIdx = mesh.vertices.size();
 
-    mesh.vertices.push_back({(normal - tangent - bitangent) * size * 0.5f, normal, {1,1,1,1}, {0,0}});
-    mesh.vertices.push_back({(normal + tangent - bitangent) * size * 0.5f, normal, {1,1,1,1}, {1,0}});
-    mesh.vertices.push_back({(normal + tangent + bitangent) * size * 0.5f, normal, {1,1,1,1}, {1,1}});
-    mesh.vertices.push_back({(normal - tangent + bitangent) * size * 0.5f, normal, {1,1,1,1}, {0,1}});
+    auto v0 = glm::ivec3((normal - tangent - bitangent) * size * 0.5f);
+    auto v1 = glm::ivec3((normal + tangent - bitangent) * size * 0.5f);
+    auto v2 = glm::ivec3((normal + tangent + bitangent) * size * 0.5f);
+    auto v3 = glm::ivec3((normal - tangent + bitangent) * size * 0.5f);
+
+    uint16_t norm = 0;
+    mesh.vertices.push_back({v0, norm, 0xFFFF'FFFF, {0,0}});
+    mesh.vertices.push_back({v1, norm, 0xFFFF'FFFF, {32,0}});
+    mesh.vertices.push_back({v2, norm, 0xFFFF'FFFF, {32,32}});
+    mesh.vertices.push_back({v3, norm, 0xFFFF'FFFF, {0,32}});
 
     mesh.indices.push_back(startIdx + 2);
     mesh.indices.push_back(startIdx + 0);

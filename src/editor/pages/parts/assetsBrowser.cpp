@@ -25,7 +25,7 @@ Editor::AssetsBrowser::AssetsBrowser()
    iconCodeAdd{ctx.gpu, "data/img/icons/scriptAdd.svg", ICON_MAX_SIZE, ICON_MAX_SIZE},
    iconCodeCpp{ctx.gpu, "data/img/icons/scriptCpp.svg", ICON_MAX_SIZE, ICON_MAX_SIZE}
 {
-  activeTab = 1;
+  activeTab = 0;
 }
 
 Editor::AssetsBrowser::~AssetsBrowser() {

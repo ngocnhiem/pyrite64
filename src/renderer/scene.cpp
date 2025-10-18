@@ -47,34 +47,34 @@ Renderer::Scene::Scene()
   pipelineInfo.vertex_input_state.vertex_buffer_descriptions = vertBuffDesc;
 
   // describe the vertex attribute
-  std::array<SDL_GPUVertexAttribute, 4> vertexAttributes{};
+  std::array<SDL_GPUVertexAttribute, 3> vertexAttributes{};
   int idx = 0;
 
   // Position
   vertexAttributes[idx].buffer_slot = 0; // fetch data from the buffer at slot 0
   vertexAttributes[idx].location = idx; // layout (location = 0) in shader
-  vertexAttributes[idx].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3;
+  vertexAttributes[idx].format = SDL_GPU_VERTEXELEMENTFORMAT_HALF4;
   vertexAttributes[idx].offset = offsetof(Renderer::Vertex, pos);
   ++idx;
-
+/*
   // Normal
   vertexAttributes[idx].buffer_slot = 0;
   vertexAttributes[idx].location = idx;
-  vertexAttributes[idx].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3;
+  vertexAttributes[idx].format = SDL_GPU_VERTEXELEMENTFORMAT_U;
   vertexAttributes[idx].offset = offsetof(Renderer::Vertex, norm);
   ++idx;
-
+*/
   // Color
   vertexAttributes[idx].buffer_slot = 0;
   vertexAttributes[idx].location = idx;
-  vertexAttributes[idx].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4;
+  vertexAttributes[idx].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
   vertexAttributes[idx].offset = offsetof(Renderer::Vertex, color);
   ++idx;
 
   // UV
   vertexAttributes[idx].buffer_slot = 0;
   vertexAttributes[idx].location = idx;
-  vertexAttributes[idx].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
+  vertexAttributes[idx].format = SDL_GPU_VERTEXELEMENTFORMAT_USHORT2;
   vertexAttributes[idx].offset = offsetof(Renderer::Vertex, uv);
   ++idx;
 

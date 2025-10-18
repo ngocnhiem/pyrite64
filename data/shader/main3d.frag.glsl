@@ -9,6 +9,9 @@ layout(set = 2, binding = 0) uniform sampler2D texSampler;
 
 void main()
 {
-    FragColor = texture(texSampler, v_uv) * v_color;
-    //FragColor = v_color;
+  ivec2 uvNorm = ivec2(v_uv);
+  // tex-size:
+
+  FragColor = texelFetch(texSampler, uvNorm, 0) * v_color;
+  //FragColor = v_color;
 }

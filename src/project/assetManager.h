@@ -6,6 +6,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "../renderer/object.h"
 #include "../utils/codeParser.h"
 #include "../renderer/texture.h"
 #include "tiny3d/tools/gltf_importer/src/structs.h"
@@ -53,8 +55,9 @@ namespace Project
         std::string name{};
         std::string path{};
         FileType type{};
-        Renderer::Texture *texture{nullptr};
+        std::shared_ptr<Renderer::Texture> texture{nullptr};
         T3DMData t3dmData{};
+        Renderer::Mesh mesh3D{};
         AssetConf conf{};
         Utils::CPP::Struct params{};
       };
