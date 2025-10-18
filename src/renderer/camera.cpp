@@ -46,9 +46,10 @@ void Renderer::Camera::rotateDelta(glm::vec2 screenDelta)
     isRotating = true;
   }
 
+  constexpr float rotSpeed = 0.0025f;
   // rotate based on screen delta
-  float angleX = screenDelta.x * -0.0025f;
-  float angleY = screenDelta.y * -0.0025f;
+  float angleX = screenDelta.x * -rotSpeed;
+  float angleY = screenDelta.y * -rotSpeed;
   glm::quat qx = glm::angleAxis(angleX, glm::vec3(0, 1, 0));
   glm::quat qy = glm::angleAxis(angleY, glm::vec3(1, 0, 0));
   rot = qx * rotBase * qy;

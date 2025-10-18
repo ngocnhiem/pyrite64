@@ -85,6 +85,9 @@ void Editor::Viewport3D::draw() {
   fb.resize((int)currSize.x, (int)currSize.y);
   camera.screenSize = {currSize.x, currSize.y};
 
+  auto &io = ImGui::GetIO();
+  float deltaTime = io.DeltaTime;
+
   ImVec2 gizPos{currPos.x + currSize.x - 40, currPos.y + 104};
 
   // mouse pos
@@ -93,26 +96,28 @@ void Editor::Viewport3D::draw() {
   mousePos.x -= screenPos.x;
   mousePos.y -= screenPos.y - 20;
 
+  float moveSpeed = 2.5f * deltaTime;
+
   bool newMouseDown = ImGui::IsMouseDown(ImGuiMouseButton_Middle) || ImGui::IsMouseDown(ImGuiMouseButton_Right);
   bool isShiftDown = ImGui::GetIO().KeyShift;
 
   if (ImGui::GetIO().KeysData[ImGuiKey_W-ImGuiKey_NamedKey_BEGIN].Down) {
-    camera.pos += camera.rot * glm::vec3(0,0,-0.1f);
+    camera.pos += camera.rot * glm::vec3(0,0,-moveSpeed);
   }
   if (ImGui::GetIO().KeysData[ImGuiKey_S-ImGuiKey_NamedKey_BEGIN].Down) {
-    camera.pos += camera.rot * glm::vec3(0,0,0.1f);
+    camera.pos += camera.rot * glm::vec3(0,0,moveSpeed);
   }
   if (ImGui::GetIO().KeysData[ImGuiKey_A-ImGuiKey_NamedKey_BEGIN].Down) {
-    camera.pos += camera.rot * glm::vec3(-0.1f,0,0);
+    camera.pos += camera.rot * glm::vec3(-moveSpeed,0,0);
   }
   if (ImGui::GetIO().KeysData[ImGuiKey_D-ImGuiKey_NamedKey_BEGIN].Down) {
-    camera.pos += camera.rot * glm::vec3(0.1f,0,0);
+    camera.pos += camera.rot * glm::vec3(moveSpeed,0,0);
   }
   if (ImGui::GetIO().KeysData[ImGuiKey_Q-ImGuiKey_NamedKey_BEGIN].Down) {
-    camera.pos += camera.rot * glm::vec3(0,-0.1f,0);
+    camera.pos += camera.rot * glm::vec3(0,-moveSpeed,0);
   }
   if (ImGui::GetIO().KeysData[ImGuiKey_E-ImGuiKey_NamedKey_BEGIN].Down) {
-    camera.pos += camera.rot * glm::vec3(0,0.1f,0);
+    camera.pos += camera.rot * glm::vec3(0,moveSpeed,0);
   }
 
   if (isMouseHover && !ImViewGuizmo::IsOver())
