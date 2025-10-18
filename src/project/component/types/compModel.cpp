@@ -9,13 +9,15 @@
 #include "../../../utils/jsonBuilder.h"
 #include "../../../utils/binaryFile.h"
 #include "../../../utils/logger.h"
+#include "../../assetManager.h"
 
-namespace Project::Component::Code
+namespace Project::Component::Model
 {
   struct Data
   {
-    uint64_t scriptUUID{0};
-    std::unordered_map<std::string, std::string> args{};
+    uint64_t modelUUID{0};
+    Renderer::Object obj3D{};
+    bool obj3DLoaded{false};
   };
 
   std::shared_ptr<void> init(Object &obj) {
@@ -26,26 +28,13 @@ namespace Project::Component::Code
   std::string serialize(Entry &entry) {
     Data &data = *static_cast<Data*>(entry.data.get());
     Utils::JSON::Builder builder{};
-    builder.set("script", data.scriptUUID);
-
-    Utils::JSON::Builder builderArgs{};
-    for (auto &arg : data.args) {
-      builderArgs.set(arg.first, arg.second);
-    }
-    builder.set("args", builderArgs);
-
+    builder.set("model", data.modelUUID);
     return builder.toString();
   }
 
   std::shared_ptr<void> deserialize(simdjson::simdjson_result<simdjson::dom::object> &doc) {
     auto data = std::make_shared<Data>();
-    data->scriptUUID = doc["script"].get<uint64_t>();
-    if (!doc["args"].error()) {
-      auto argsObj = doc["args"].get_object();
-      for (auto field : argsObj) {
-        data->args[std::string{field.key}] = field.value.get_string().value();
-      }
-    }
+    data->modelUUID = doc["model"].get<uint64_t>();
     return data;
   }
 
@@ -53,7 +42,7 @@ namespace Project::Component::Code
   {
     Data &data = *static_cast<Data*>(entry.data.get());
 
-    auto idRes = ctx.codeIdxMapUUID.find(data.scriptUUID);
+    /*auto idRes = ctx.codeIdxMapUUID.find(data.scriptUUID);
     uint16_t id = 0xDEAD;
     if (idRes == ctx.codeIdxMapUUID.end()) {
       Utils::Logger::log("Component Code: Script UUID not found: " + std::to_string(entry.uuid), Utils::Logger::LEVEL_ERROR);
@@ -73,12 +62,13 @@ namespace Project::Component::Code
       if (val.empty())val = "0";
       ctx.fileObj.writeAs(val, field.type);
     }
+    */
   }
 
   const char* getter(void* user_data, int idx)
   {
-    auto &scriptList = ctx.project->getAssets().getTypeEntries(AssetManager::FileType::CODE);
-    if (idx < 0 || idx >= scriptList.size())return "<Select Script>";
+    auto &scriptList = ctx.project->getAssets().getTypeEntries(AssetManager::FileType::MODEL_3D);
+    if (idx < 0 || idx >= scriptList.size())return "<Select Model>";
     return scriptList[idx].name.c_str();
   }
 
@@ -87,47 +77,46 @@ namespace Project::Component::Code
     Data &data = *static_cast<Data*>(entry.data.get());
 
     auto &assets = ctx.project->getAssets();
-    auto &scriptList = assets.getTypeEntries(AssetManager::FileType::CODE);
+    auto &modelList = assets.getTypeEntries(AssetManager::FileType::MODEL_3D);
 
     if (ImGui::InpTable::start("Comp")) {
       ImGui::InpTable::addString("Name", entry.name);
-      ImGui::InpTable::add("Script");
+      ImGui::InpTable::add("Model");
       //ImGui::InputScalar("##UUID", ImGuiDataType_U64, &data.scriptUUID);
 
-      int idx = scriptList.size();
-      for (int i=0; i<scriptList.size(); ++i) {
-        if (scriptList[i].uuid == data.scriptUUID) {
+      int idx = modelList.size();
+      for (int i=0; i<modelList.size(); ++i) {
+        if (modelList[i].uuid == data.modelUUID) {
           idx = i;
           break;
         }
       }
 
-      ImGui::Combo("##UUID", &idx, getter, nullptr, scriptList.size()+1);
+      if (ImGui::Combo("##UUID", &idx, getter, nullptr, modelList.size()+1)) {
+        data.obj3DLoaded = false;
+      }
 
-      if (idx < scriptList.size()) {
-        const auto &script = scriptList[idx];
-        data.scriptUUID = script.uuid;
-
-        ImGui::InpTable::add("Arguments:");
-        if (script.params.fields.empty()) {
-          ImGui::Text("(None)");
-        }
-
-        int idx = 0;
-        for (auto &field : script.params.fields)
-        {
-          std::string name = field.name;
-          auto metaName = field.attr.find("P64::Name");
-          if (metaName != field.attr.end()) {
-            name = metaName->second;
-          }
-
-          ImGui::InpTable::addString(name, data.args[field.name]);
-          ++idx;
-        }
+      if (idx < modelList.size()) {
+        const auto &script = modelList[idx];
+        data.modelUUID = script.uuid;
       }
 
       ImGui::InpTable::end();
     }
+  }
+
+  void draw3D(Object& obj, Entry &entry, SDL_GPUCommandBuffer* cmdBuff, SDL_GPURenderPass* pass)
+  {
+    Data &data = *static_cast<Data*>(entry.data.get());
+    if (!data.obj3DLoaded) {
+      auto asset = ctx.project->getAssets().getEntryByUUID(data.modelUUID);
+      if (asset && asset->mesh3D) {
+        data.obj3D.setMesh(asset->mesh3D);
+      }
+      data.obj3DLoaded = true;
+    }
+
+    data.obj3D.setPos(obj.pos);
+    data.obj3D.draw(pass, cmdBuff);
   }
 }

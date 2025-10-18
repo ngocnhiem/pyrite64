@@ -147,6 +147,7 @@ add_executable(p64editor src/main.cpp
         src/utils/meshGen.cpp
         src/utils/mesh/gltf.h
         src/utils/mesh/gltf.cpp
+        src/project/component/types/compModel.cpp
 )
 
 target_include_directories(p64editor PRIVATE

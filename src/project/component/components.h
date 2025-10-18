@@ -10,6 +10,10 @@
 #include "simdjson.h"
 #include "../../build/sceneContext.h"
 
+struct SDL_GPUCommandBuffer;
+struct SDL_GPUGraphicsPipeline;
+struct SDL_GPURenderPass;
+
 namespace Project { class Object; }
 
 namespace Project::Component
@@ -23,6 +27,7 @@ namespace Project::Component
   };
 
   typedef void(*FuncCompDraw)(Object&, Entry &entry);
+  typedef void(*FuncCompDraw3D)(Object&, Entry &entry, SDL_GPUCommandBuffer* cmdBuff, SDL_GPURenderPass* pass);
   typedef std::shared_ptr<void>(*FuncCompInit)(Object&);
   typedef std::string(*FuncCompSerial)(Entry &entry);
   typedef std::shared_ptr<void>(*FuncCompDeserial)(simdjson::simdjson_result<simdjson::dom::object> &doc);
@@ -35,6 +40,7 @@ namespace Project::Component
     const char* name{};
     FuncCompInit funcInit{};
     FuncCompDraw funcDraw{};
+    FuncCompDraw3D funcDraw3D{};
     FuncCompSerial funcSerialize{};
     FuncCompDeserial funcDeserialize{};
     FuncCompBuild funcBuild{};
@@ -45,12 +51,14 @@ namespace Project::Component
     { \
       std::shared_ptr<void> init(Object& obj); \
       void draw(Object& obj, Entry &entry); \
+      void draw3D(Object&, Entry &entry, SDL_GPUCommandBuffer* cmdBuff, SDL_GPURenderPass* pass); \
       std::string serialize(Entry &entry); \
       std::shared_ptr<void> deserialize(simdjson::simdjson_result<simdjson::dom::object> &doc); \
       void build(Object&, Entry &entry, Build::SceneCtx &ctx); \
     }
 
   MAKE_COMP(Code)
+  MAKE_COMP(Model)
 
   constexpr std::array TABLE{
     CompInfo{
@@ -62,6 +70,17 @@ namespace Project::Component
       .funcSerialize = Code::serialize,
       .funcDeserialize = Code::deserialize,
       .funcBuild = Code::build
+    },
+    CompInfo{
+      .id = 1,
+      .icon = ICON_FA_CUBE " ",
+      .name = "Model",
+      .funcInit = Model::init,
+      .funcDraw = Model::draw,
+      .funcDraw3D = Model::draw3D,
+      .funcSerialize = Model::serialize,
+      .funcDeserialize = Model::deserialize,
+      .funcBuild = Model::build
     },
   };
 }

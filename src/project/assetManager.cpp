@@ -47,7 +47,7 @@ Project::AssetManager::AssetManager(Project* pr)
 }
 
 void Project::AssetManager::reload() {
-  entries.clear();
+  for (auto &e : entries)e.clear();
 
   auto assetPath = std::filesystem::path{project->getPath()} / "assets";
   if (!std::filesystem::exists(assetPath)) {
@@ -108,7 +108,7 @@ void Project::AssetManager::reload() {
         }
       }
 
-      entries.push_back(entry);
+      entries[(int)type].push_back(entry);
     }
   }
 
@@ -147,28 +147,25 @@ void Project::AssetManager::reload() {
         .params = Utils::CPP::parseDataStruct(code, "Data")
       };
 
-      entries.push_back(entry);
+      entries[(int)type].push_back(entry);
       entriesMap[entry.uuid] = static_cast<int>(entries.size() - 1);
-
-      if (type == FileType::CODE) {
-        entriesScript.push_back(entry);
-        entriesMapScript[entry.uuid] = static_cast<int>(entriesScript.size() - 1);
-      }
     }
   }
 }
 
 void Project::AssetManager::save()
 {
-  for(auto &entry : entries)
-  {
-    if(entry.type == FileType::UNKNOWN || entry.type == FileType::CODE) {
-      continue;
-    }
+  for(auto &typed : entries) {
+    for(auto &entry : typed)
+    {
+      if(entry.type == FileType::UNKNOWN || entry.type == FileType::CODE) {
+        continue;
+      }
 
-    auto pathMeta = entry.path + ".conf";
-    auto json = entry.conf.serialize();
-    Utils::FS::saveTextFile(pathMeta, entry.conf.serialize());
+      auto pathMeta = entry.path + ".conf";
+      auto json = entry.conf.serialize();
+      Utils::FS::saveTextFile(pathMeta, entry.conf.serialize());
+    }
   }
 }
 

@@ -64,56 +64,58 @@ void Editor::AssetsBrowser::draw() {
     currentWidth += itemWidth;
   };
 
-  for (const auto &asset : assets)
-  {
-    if (asset.type == FileType::CODE) {
-      if (activeTab != TAB_IDX_SCRIPTS)continue;
-    } else {
-      if (activeTab == TAB_IDX_SCRIPTS)continue;
-    }
-
-    if (asset.type == FileType::UNKNOWN)continue;
-    checkLineBreak();
-
-    auto icon = ImTextureRef(iconFile.getGPUTex());
-    if (asset.texture) {
-      icon = ImTextureRef(asset.texture->getGPUTex());
-    } else {
-      if (asset.type == FileType::MODEL_3D) {
-        icon = ImTextureRef(iconMesh.getGPUTex());
-      } else if (asset.type == FileType::AUDIO) {
-        icon = ImTextureRef(iconMusic.getGPUTex());
-      } else if (asset.type == FileType::CODE) {
-        icon = ImTextureRef(iconCodeCpp.getGPUTex());
-      }
-    }
-
-    bool isSelected = (ctx.selAssetUUID == asset.uuid);
-    if(isSelected) {
-      ImGui::PushStyleColor(ImGuiCol_Button, {0.5f,0.5f,0.7f,1});
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, {0.5f,0.5f,0.7f,0.8f});
-    }
-
-    if (ImGui::ImageButton(asset.name.c_str(), icon,
-      {imageSize, imageSize}, {0,0}, {1,1}, {0,0,0,0}, {1,1,1,
-        asset.conf.exclude ? 0.25f : 1.0f
-      }
-    )) {
-      ctx.selAssetUUID = asset.uuid == ctx.selAssetUUID ? 0 : asset.uuid;
-    }
-
-    if (ImGui::BeginDragDropSource()) {
-      ImGui::ImageButton(asset.name.c_str(), icon, {imageSize*0.75f, imageSize*0.75f});
-      ImGui::EndDragDropSource();
-    }
-
-    if(isSelected)ImGui::PopStyleColor(2);
-
-    if(ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+  for (const auto &typed : assets) {
+    for (const auto &asset : typed)
     {
-      ImGui::SetTooltip("File: %s\nUUID: %08lX-%08lX", asset.name.c_str(),
-        asset.uuid >> 32, asset.uuid & 0xFFFFFFFF
-      );
+      if (asset.type == FileType::CODE) {
+        if (activeTab != TAB_IDX_SCRIPTS)continue;
+      } else {
+        if (activeTab == TAB_IDX_SCRIPTS)continue;
+      }
+
+      if (asset.type == FileType::UNKNOWN)continue;
+      checkLineBreak();
+
+      auto icon = ImTextureRef(iconFile.getGPUTex());
+      if (asset.texture) {
+        icon = ImTextureRef(asset.texture->getGPUTex());
+      } else {
+        if (asset.type == FileType::MODEL_3D) {
+          icon = ImTextureRef(iconMesh.getGPUTex());
+        } else if (asset.type == FileType::AUDIO) {
+          icon = ImTextureRef(iconMusic.getGPUTex());
+        } else if (asset.type == FileType::CODE) {
+          icon = ImTextureRef(iconCodeCpp.getGPUTex());
+        }
+      }
+
+      bool isSelected = (ctx.selAssetUUID == asset.uuid);
+      if(isSelected) {
+        ImGui::PushStyleColor(ImGuiCol_Button, {0.5f,0.5f,0.7f,1});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, {0.5f,0.5f,0.7f,0.8f});
+      }
+
+      if (ImGui::ImageButton(asset.name.c_str(), icon,
+        {imageSize, imageSize}, {0,0}, {1,1}, {0,0,0,0}, {1,1,1,
+          asset.conf.exclude ? 0.25f : 1.0f
+        }
+      )) {
+        ctx.selAssetUUID = asset.uuid == ctx.selAssetUUID ? 0 : asset.uuid;
+      }
+
+      if (ImGui::BeginDragDropSource()) {
+        ImGui::ImageButton(asset.name.c_str(), icon, {imageSize*0.75f, imageSize*0.75f});
+        ImGui::EndDragDropSource();
+      }
+
+      if(isSelected)ImGui::PopStyleColor(2);
+
+      if(ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+      {
+        ImGui::SetTooltip("File: %s\nUUID: %08lX-%08lX", asset.name.c_str(),
+          asset.uuid >> 32, asset.uuid & 0xFFFFFFFF
+        );
+      }
     }
   }
 

@@ -19,7 +19,7 @@ void Build::buildScripts(Project::Project &project, SceneCtx &sceneCtx)
   std::string srcEntries = "";
   std::string srcDecl = "";
 
-  auto scripts = project.getAssets().getScriptEntries();
+  auto scripts = project.getAssets().getTypeEntries(Project::AssetManager::FileType::CODE);
   uint32_t idx = 0;
   for (auto &script : scripts)
   {

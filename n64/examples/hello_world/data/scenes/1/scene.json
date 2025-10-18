@@ -2,7 +2,7 @@
 "conf": {"name":"Scene A",
 "fbWidth":320,
 "fbHeight":240,
-"fbFormat":0,"clearColor":[0.6464294791221619,0.7782257795333862,0.7750371694564819,1.0],
+"fbFormat":0,"clearColor":[0.08204345405101776,0.10530735552310944,0.2338709831237793,1.0],
 "doClearColor":true,
 "doClearDepth":true},
 "graph": {"id":0,
@@ -11,10 +11,17 @@
 "name":"Test 1",
 "uuid":10013922054354267862,"pos":[1.0,0.0,0.0],"rot":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0],"components":[{"id":0,
 "uuid":8610499884717988503,
-"name":" Code A","data":{"script":14100591792882240448,"args":{"sceneId":"2",
-"speed":"1.0"}}
+"name":" Code A","data":{"script":14100591792882240448,"args":{"speed":"1.0",
+"sceneId":"2"}}
+},
+{"id":1,
+"uuid":8516570315678244938,
+"name":"Model","data":{"model":15664466410606258428}
 }],"children":[]},
-{"id":2,
-"name":"Test Mesh",
-"uuid":3640106842543303841,"pos":[0.0,0.0,0.0],"rot":[0.0,0.0,0.0,0.0],"scale":[0.0,0.0,0.0],"components":[],"children":[]}]}
+{"id":1,
+"name":"New Object (1)",
+"uuid":13786383135614671346,"pos":[-1.0,0.0,0.0],"rot":[0.0,0.0,0.0,0.0],"scale":[0.0,0.0,0.0],"components":[{"id":1,
+"uuid":3231469276560982255,
+"name":"Model","data":{"model":8408891455870217598}
+}],"children":[]}]}
 }

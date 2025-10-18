@@ -69,8 +69,22 @@ void Editor::Viewport3D::onRenderPass(SDL_GPUCommandBuffer* cmdBuff, SDL_GPUGrap
   camera.apply(uniGlobal);
   SDL_PushGPUVertexUniformData(cmdBuff, 0, &uniGlobal, sizeof(uniGlobal));
 
-  obj.draw(renderPass3D, cmdBuff);
-  obj2.draw(renderPass3D, cmdBuff);
+  auto scene = ctx.project->getScenes().getLoadedScene();
+  auto &rootObj = scene->getRootObject();
+  for(auto& child : rootObj.children)
+  {
+    for(auto &comp : child->components)
+    {
+      auto &def = Project::Component::TABLE[comp.id];
+      if (def.funcDraw3D) {
+        def.funcDraw3D(*child, comp, cmdBuff, renderPass3D);
+      }
+    }
+    //child.draw(renderPass3D, cmdBuff);
+  }
+
+  //obj.draw(renderPass3D, cmdBuff);
+  //obj2.draw(renderPass3D, cmdBuff);
 
   SDL_EndGPURenderPass(renderPass3D);
 }

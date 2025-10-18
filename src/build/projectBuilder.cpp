@@ -48,42 +48,44 @@ namespace
     };
 
     std::string rulePath{};
-    for (const auto &entry : entries)
-    {
-      if (entry.conf.exclude)continue;
-      auto comprLevel = std::to_string(getComprLevel(entry.conf.compression));
-      auto romPath = getAssetROMPath(entry.path, projectBase);
-
-      switch(entry.type)
+    for (const auto &typed : entries) {
+      for (const auto &entry : typed)
       {
-        case AT::IMAGE:
-          assetList.push_back(changeExt(romPath, ".sprite"));
-          rules += assetList.back() + ": MKSPRITE_FLAGS = -c " + comprLevel;
-          if (entry.conf.format != 0) {
-            rules += std::string{" -f "} + Utils::TEX_TYPES[entry.conf.format];
-          }
-          rules += '\n';
-        break;
+        if (entry.conf.exclude)continue;
+        auto comprLevel = std::to_string(getComprLevel(entry.conf.compression));
+        auto romPath = getAssetROMPath(entry.path, projectBase);
 
-        case AT::MODEL_3D:
-          assetList.push_back(changeExt(romPath, ".t3dm"));
-          rules += assetList.back() + ": T3DM_ASSET_FLAGS = -c " + comprLevel + "\n";
-          rules += assetList.back() + ": T3DM_FLAGS = ";
-          if (entry.conf.baseScale != 0) {
-            rules += std::string{" --base-scale="} + std::to_string(entry.conf.baseScale);
-          }
-          if (entry.conf.gltfBVH) {
-            rules += std::string{" --bvh"};
-          }
-          rules += '\n';
-        break;
+        switch(entry.type)
+        {
+          case AT::IMAGE:
+            assetList.push_back(changeExt(romPath, ".sprite"));
+            rules += assetList.back() + ": MKSPRITE_FLAGS = -c " + comprLevel;
+            if (entry.conf.format != 0) {
+              rules += std::string{" -f "} + Utils::TEX_TYPES[entry.conf.format];
+            }
+            rules += '\n';
+            break;
 
-        case AT::AUDIO:
-          assetList.push_back(changeExt(romPath, ".wav64"));
-          // @TODO: handle XM
-        break;
+          case AT::MODEL_3D:
+            assetList.push_back(changeExt(romPath, ".t3dm"));
+            rules += assetList.back() + ": T3DM_ASSET_FLAGS = -c " + comprLevel + "\n";
+            rules += assetList.back() + ": T3DM_FLAGS = ";
+            if (entry.conf.baseScale != 0) {
+              rules += std::string{" --base-scale="} + std::to_string(entry.conf.baseScale);
+            }
+            if (entry.conf.gltfBVH) {
+              rules += std::string{" --bvh"};
+            }
+            rules += '\n';
+            break;
 
-        default: break;
+          case AT::AUDIO:
+            assetList.push_back(changeExt(romPath, ".wav64"));
+            // @TODO: handle XM
+            break;
+
+          default: break;
+        }
       }
     }
 

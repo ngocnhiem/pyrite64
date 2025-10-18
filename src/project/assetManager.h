@@ -35,7 +35,9 @@ namespace Project
         AUDIO,
         MODEL_3D,
         CODE,
-        PREFAB
+        PREFAB,
+
+        _SIZE
       };
 
       struct AssetConf
@@ -64,39 +66,42 @@ namespace Project
 
     private:
       Project *project;
-      std::vector<Entry> entries{};
-      std::vector<Entry> entriesScript{};
+      std::array<std::vector<Entry>, static_cast<size_t>(FileType::_SIZE)> entries{};
 
       std::string defaultScript{};
 
     public:
       std::unordered_map<uint64_t, int> entriesMap{};
-      std::unordered_map<uint64_t, int> entriesMapScript{};
+      //std::unordered_map<uint64_t, int> entriesMapScript{};
 
       AssetManager(Project *pr);
 
       void reload();
 
-      [[nodiscard]] const std::vector<Entry>& getEntries() const {
+      [[nodiscard]] const auto& getEntries() const {
         return entries;
       }
-      [[nodiscard]] const std::vector<Entry>& getScriptEntries() const {
-        return entriesScript;
+      [[nodiscard]] const std::vector<Entry>& getTypeEntries(FileType type) const {
+        return entries[static_cast<int>(type)];
       }
 
       Entry* getByName(const std::string &name) {
-        for (auto &entry : entries) {
-          if (entry.name == name) {
-            return &entry;
+        for (auto &typed : entries) {
+          for (auto &entry : typed) {
+            if (entry.name == name) {
+              return &entry;
+            }
           }
         }
         return nullptr;
       }
 
       Entry* getEntryByUUID(uint64_t uuid) {
-        for (auto &entry : entries) {
-          if (entry.uuid == uuid) {
-            return &entry;
+        for (auto &typed : entries) {
+          for (auto &entry : typed) {
+            if (entry.uuid == uuid) {
+              return &entry;
+            }
           }
         }
         return nullptr;
