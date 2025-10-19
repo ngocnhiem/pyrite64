@@ -13,7 +13,7 @@
 #include "lib/memory.h"
 #include "lib/logger.h"
 #include "lib/matrixManager.h"
-#include "lib/assetManager.h"
+#include "assets/assetManager.h"
 #include "scene/componentTable.h"
 #include "script/scriptTable.h"
 
@@ -97,6 +97,7 @@ void P64::Scene::loadScene() {
             auto argSize = ptrIn[1] * 4;
 
             const auto &compDef = COMP_TABLE[compId];
+            assertf(compDef.getAllocSize != nullptr, "Component %d unknown!", compId);
             allocSize += compDef.getAllocSize(ptrIn + 2);
             allocSize += sizeof(Object::CompRef);
 
@@ -126,7 +127,8 @@ void P64::Scene::loadScene() {
             objCompTablePtr->offset = objCompDataPtr - (char*)obj;
             ++objCompTablePtr;
 
-            compDef.init(*obj, objCompDataPtr, ptrIn + 2);
+            compDef.initDel(*obj, objCompDataPtr, ptrIn + 2);
+            objCompDataPtr += compDef.getAllocSize(ptrIn + 2);
             ptrIn += argSize;
           }
 
@@ -160,5 +162,21 @@ void P64::Scene::loadScene() {
     }
 
     free(objFileStart);
+
+    // TEST:
+    cameras.clear();
+    cameras.push_back({});
+    auto &cam = cameras[0];
+    cam.setPos({0,0,3});
+    cam.fov  = T3D_DEG_TO_RAD(80.0f);
+    cam.near = 0.1f;
+    cam.far  = 100.0f;
+    for(auto &vp : cam.viewports)
+    {
+      vp = t3d_viewport_create();
+      t3d_viewport_set_area(vp,
+        0,0, 320, 240
+      );
+    }
   }
 }

@@ -19,6 +19,8 @@ namespace P64
         uint16_t offset{};
       };
 
+      ~Object();
+
       uint16_t id{};
 
       uint16_t compCount{0};

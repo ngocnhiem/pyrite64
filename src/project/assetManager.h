@@ -56,6 +56,8 @@ namespace Project
         uint64_t uuid{0};
         std::string name{};
         std::string path{};
+        std::string outPath{};
+        std::string romPath{};
         FileType type{};
         std::shared_ptr<Renderer::Texture> texture{nullptr};
         T3DMData t3dmData{};

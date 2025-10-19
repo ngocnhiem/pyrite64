@@ -20,13 +20,15 @@ namespace P64::Comp
       return sizeof(Code) + scriptPtr.dataSize;
     }
 
-    static void init(Object& obj, Code* data, uint16_t* initData)
+    static void initDelete(Object& obj, Code* data, uint16_t* initData)
     {
+      if (initData == nullptr)return;
+
       auto scriptPtr = Script::getCodeByIndex(initData[0]);
       // reserved: initData[1];
 
       data->funcUpdate = scriptPtr.update;
-      data->funcDraw = nullptr;
+      data->funcDraw = scriptPtr.draw;
 
       if (scriptPtr.dataSize > 0) {
         memcpy((char*)data + sizeof(Code), (char*)&initData[2], scriptPtr.dataSize);

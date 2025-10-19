@@ -10,6 +10,7 @@
 #include "scene/sceneManager.h"
 #include "scene/globalState.h"
 #include "./audio/audioManagerPrivate.h"
+#include "assets/assetManager.h"
 
 P64::GlobalState P64::state{};
 
@@ -31,10 +32,11 @@ int main()
   rdpq_init();
   // rdpq_debug_start();
 
-  P64::AudioManager::init();
-
   t3d_init({});
   joypad_init();
+
+  P64::AssetManager::init();
+  P64::AudioManager::init();
 
 	P64::Log::info("Starting Game");
 

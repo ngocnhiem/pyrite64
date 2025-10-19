@@ -11,7 +11,7 @@
 #include "lib/memory.h"
 #include "lib/logger.h"
 #include "lib/matrixManager.h"
-#include "lib/assetManager.h"
+#include "assets/assetManager.h"
 #include "audio/audioManager.h"
 #include "../audio/audioManagerPrivate.h"
 #include "scene/componentTable.h"
@@ -70,7 +70,7 @@ P64::Scene::~Scene()
 
   AudioManager::stopAll();
   MatrixManager::reset();
-  AssetManager::reset();
+  AssetManager::freeAll();
 }
 
 void P64::Scene::update(float deltaTime) {
@@ -126,11 +126,18 @@ void P64::Scene::draw(float deltaTime)
     cam.attach();
 
     t3d_matrix_push_pos(1);
-    rspq_block_run(dplObjects);
+    //rspq_block_run(dplObjects);
 
-    /*for(auto actor : actors) {
-      actor->draw(deltaTime);
-    }*/
+    for(auto obj : objects)
+    {
+      auto compRefs = obj->getCompRefs();
+
+      for (uint32_t i=0; i<obj->compCount; ++i) {
+        const auto &compDef = COMP_TABLE[compRefs[i].type];
+        char* dataPtr = (char*)obj + compRefs[i].offset;
+        compDef.draw(*obj, dataPtr);
+      }
+    }
 
     t3d_matrix_pop(1);
   }

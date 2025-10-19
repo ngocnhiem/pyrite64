@@ -10,13 +10,13 @@ namespace P64
   class Object;
 
   typedef uint32_t(*FuncGetAllocSize)(void*);
-  typedef void(*FuncInit)(Object&, void*, void*);
+  typedef void(*FuncInitDel)(Object&, void*, void*);
   typedef void(*FuncUpdate)(Object&, void*);
   typedef void(*FuncDraw)(Object&, void*);
 
   struct ComponentDef
   {
-    FuncInit init{};
+    FuncInitDel initDel{};
     FuncUpdate update{};
     FuncDraw draw{};
     FuncGetAllocSize getAllocSize{};

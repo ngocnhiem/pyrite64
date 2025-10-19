@@ -3,12 +3,13 @@
 * @license MIT
 */
 #include "scene/componentTable.h"
-#include "scene/components/code.h"
 
-// Note: GCC allows 'reinterpret_cast' in constant expressions
+#include "scene/components/code.h"
+#include "scene/components/model.h"
+
 #define SET_COMP(name) \
   { \
-    .init   = reinterpret_cast<FuncInit>(Comp::name::init), \
+    .initDel = reinterpret_cast<FuncInitDel>(Comp::name::initDelete), \
     .update = reinterpret_cast<FuncUpdate>(Comp::name::update), \
     .draw   = reinterpret_cast<FuncDraw>(Comp::name::draw), \
     .getAllocSize = reinterpret_cast<FuncGetAllocSize>(Comp::name::getAllocSize), \
@@ -18,6 +19,7 @@ namespace P64
 {
   const ComponentDef COMP_TABLE[COMP_TABLE_SIZE] {
     SET_COMP(Code),
-    SET_COMP(Code),
+    SET_COMP(Model),
+    {}
   };
 }

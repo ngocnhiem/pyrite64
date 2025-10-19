@@ -18,5 +18,13 @@ namespace P64::Script::C3AF5D870988CBC0
       debugf("Arg: Scene-Id: %ld\n", data->sceneId);
       SceneManager::load(data->sceneId);
     }
+
+    data->speed += 0.1f;
+  }
+
+  void draw(Object& obj, Data *data)
+  {
+    uint8_t green = (fm_sinf(data->speed) * 0.5f + 0.5f) * 255;
+    rdpq_set_prim_color({0xFF, green, 0, 0xFF});
   }
 }

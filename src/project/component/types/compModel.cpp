@@ -42,6 +42,17 @@ namespace Project::Component::Model
   {
     Data &data = *static_cast<Data*>(entry.data.get());
 
+    auto res = ctx.assetUUIDToIdx.find(data.modelUUID);
+    uint16_t id = 0xDEAD;
+    if (res == ctx.assetUUIDToIdx.end()) {
+      Utils::Logger::log("Component Model: Model UUID not found: " + std::to_string(entry.uuid), Utils::Logger::LEVEL_ERROR);
+    } else {
+      id = res->second;
+    }
+
+    ctx.fileObj.write<uint16_t>(id);
+    ctx.fileObj.write<uint16_t>(0);
+
     /*auto idRes = ctx.codeIdxMapUUID.find(data.scriptUUID);
     uint16_t id = 0xDEAD;
     if (idRes == ctx.codeIdxMapUUID.end()) {

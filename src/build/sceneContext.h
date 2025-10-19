@@ -16,6 +16,7 @@ namespace Build
   {
     Project::Project *project{};
     std::vector<std::string> files{};
+    std::unordered_map<uint64_t, uint32_t> assetUUIDToIdx{};
     std::unordered_map<uint64_t, uint32_t> codeIdxMapUUID{};
     Utils::BinaryFile fileScene{};
     Utils::BinaryFile fileObj{};

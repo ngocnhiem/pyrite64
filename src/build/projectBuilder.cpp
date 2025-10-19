@@ -18,21 +18,6 @@ using AT = Project::AssetManager::FileType;
 
 namespace
 {
-  std::string getAssetROMPath(const std::string &path, const std::string &basePath)
-  {
-    auto pathAbs = fs::absolute(path).string();
-    pathAbs = pathAbs.substr(basePath.length());
-    pathAbs = Utils::replaceFirst(pathAbs, "/assets/", "filesystem/");
-    return pathAbs;
-  }
-
-  std::string changeExt(const std::string &path, const std::string &newExt)
-  {
-    auto p = fs::path(path);
-    p.replace_extension(newExt);
-    return p.string();
-  }
-
   std::string genAssetRules(Project::Project &project, std::vector<std::string> &assetList)
   {
     std::string rules = "";
@@ -53,12 +38,11 @@ namespace
       {
         if (entry.conf.exclude)continue;
         auto comprLevel = std::to_string(getComprLevel(entry.conf.compression));
-        auto romPath = getAssetROMPath(entry.path, projectBase);
 
         switch(entry.type)
         {
           case AT::IMAGE:
-            assetList.push_back(changeExt(romPath, ".sprite"));
+            assetList.push_back(entry.outPath);
             rules += assetList.back() + ": MKSPRITE_FLAGS = -c " + comprLevel;
             if (entry.conf.format != 0) {
               rules += std::string{" -f "} + Utils::TEX_TYPES[entry.conf.format];
@@ -67,7 +51,7 @@ namespace
             break;
 
           case AT::MODEL_3D:
-            assetList.push_back(changeExt(romPath, ".t3dm"));
+            assetList.push_back(entry.outPath);
             rules += assetList.back() + ": T3DM_ASSET_FLAGS = -c " + comprLevel + "\n";
             rules += assetList.back() + ": T3DM_FLAGS = ";
             if (entry.conf.baseScale != 0) {
@@ -80,7 +64,7 @@ namespace
             break;
 
           case AT::AUDIO:
-            assetList.push_back(changeExt(romPath, ".wav64"));
+            assetList.push_back(entry.outPath);
             // @TODO: handle XM
             break;
 
@@ -106,8 +90,51 @@ bool Build::buildProject(std::string path)
     fs::create_directories(fsDataPath);
   }
 
-  Build::SceneCtx sceneCtx{};
+  SceneCtx sceneCtx{};
   sceneCtx.project = &project;
+
+  auto mkAssetRules = genAssetRules(project, sceneCtx.files);
+
+  // Asset-Manager
+  {
+    struct Entry
+    {
+      std::string path{};
+      uint32_t stringOffset{};
+      uint32_t type{};
+    };
+
+    std::vector<Entry> assetList{};
+    uint32_t stringOffset{0};
+    uint32_t assetCount = 0;
+    for (auto &typed : project.getAssets().getEntries()) {
+      for (auto &entry : typed) {
+        if (entry.conf.exclude || entry.type == Project::AssetManager::FileType::UNKNOWN) continue;
+        sceneCtx.assetUUIDToIdx[entry.uuid] = assetList.size();
+
+        assetList.push_back({
+          entry.romPath,
+          stringOffset,
+          ((uint32_t)entry.type) << 24
+        });
+
+        stringOffset += entry.romPath.size() + 1;
+        ++assetCount;
+      }
+    }
+
+    Utils::BinaryFile fileList{};
+    fileList.write<uint32_t>(assetCount);
+    uint32_t baseOffset = (assetCount * sizeof(uint32_t)*2) + sizeof(uint32_t);
+    for (auto &entry : assetList) {
+      fileList.write(baseOffset + entry.stringOffset);
+      fileList.write(entry.type);
+    }
+    for (auto &entry : assetList) {
+      fileList.writeChars(entry.path.c_str(), entry.path.size()+1);
+    }
+    fileList.writeToFile(fsDataPath / "a");
+  }
 
   // Scripts
   buildScripts(project, sceneCtx);
@@ -126,7 +153,7 @@ bool Build::buildProject(std::string path)
   makefile = Utils::replaceAll(makefile, "{{ENGINE_PATH}}", enginePath);
   makefile = Utils::replaceAll(makefile, "{{ROM_NAME}}", project.conf.romName);
   makefile = Utils::replaceAll(makefile, "{{PROJECT_NAME}}", project.conf.name);
-  makefile = Utils::replaceAll(makefile, "{{RULES_ASSETS}}", genAssetRules(project, sceneCtx.files));
+  makefile = Utils::replaceAll(makefile, "{{RULES_ASSETS}}", mkAssetRules);
   makefile = Utils::replaceAll(makefile, "{{ASSET_LIST}}", Utils::join(sceneCtx.files, " "));
 
   auto oldMakefile = Utils::FS::loadTextFile(path + "/Makefile");

@@ -11,7 +11,7 @@ N64_CXXFLAGS += -std=gnu++20 -fno-exceptions -Os -Iinclude \
 	-Wshadow -Wdouble-promotion -Wformat-security -Wformat-overflow -Wformat-truncation
 
 src = $(wildcard src/*.cpp) $(wildcard src/vi/*.cpp) $(wildcard src/lib/*.cpp) \
-	$(wildcard src/scene/*.cpp) $(wildcard src/audio/*.cpp)
+	$(wildcard src/scene/*.cpp) $(wildcard src/audio/*.cpp) $(wildcard src/assets/*.cpp)
 
 all: $(BUILD_DIR)/$(PROJECT_NAME).a
 

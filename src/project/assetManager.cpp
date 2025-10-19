@@ -19,14 +19,31 @@
 #include "../utils/mesh/gltf.h"
 #include "tiny3d/tools/gltf_importer/src/parser.h"
 
+namespace fs = std::filesystem;
+
 namespace
 {
-  std::filesystem::path getCodePath(Project::Project *project) {
-    auto res = std::filesystem::path{project->getPath()} / "src" / "user";
-    if (!std::filesystem::exists(res)) {
-      std::filesystem::create_directory(res);
+  fs::path getCodePath(Project::Project *project) {
+    auto res = fs::path{project->getPath()} / "src" / "user";
+    if (!fs::exists(res)) {
+      fs::create_directory(res);
     }
     return res;
+  }
+
+  std::string getAssetROMPath(const std::string &path, const std::string &basePath)
+  {
+    auto pathAbs = fs::absolute(path).string();
+    pathAbs = pathAbs.substr(basePath.length());
+    pathAbs = Utils::replaceFirst(pathAbs, "/assets/", "filesystem/");
+    return pathAbs;
+  }
+
+  std::string changeExt(const std::string &path, const std::string &newExt)
+  {
+    auto p = fs::path(path);
+    p.replace_extension(newExt);
+    return p.string();
   }
 }
 
@@ -49,31 +66,44 @@ Project::AssetManager::AssetManager(Project* pr)
 void Project::AssetManager::reload() {
   for (auto &e : entries)e.clear();
 
-  auto assetPath = std::filesystem::path{project->getPath()} / "assets";
-  if (!std::filesystem::exists(assetPath)) {
-    std::filesystem::create_directory(assetPath);
+  auto assetPath = fs::path{project->getPath()} / "assets";
+  if (!fs::exists(assetPath)) {
+    fs::create_directory(assetPath);
   }
 
+  auto projectBase = fs::absolute(project->getPath()).string();
+
   // scan all files
-  for (const auto &entry : std::filesystem::directory_iterator{assetPath}) {
+  for (const auto &entry : fs::directory_iterator{assetPath}) {
     if (entry.is_regular_file()) {
       auto path = entry.path();
       auto ext = path.extension().string();
 
+      std::string outPath{};
+      outPath = getAssetROMPath(path, projectBase);
+
       FileType type = FileType::UNKNOWN;
       if (ext == ".png") {
         type = FileType::IMAGE;
+        outPath = changeExt(outPath, ".sprite");
       } else if (ext == ".wav" || ext == ".mp3") {
         type = FileType::AUDIO;
+        outPath = changeExt(outPath, ".wav64");
       } else if (ext == ".glb" || ext == ".gltf") {
         type = FileType::MODEL_3D;
+        outPath = changeExt(outPath, ".t3dm");
       }
+
+      auto romPath = outPath;
+      romPath.replace(0, std::string{"filesystem/"}.length(), "rom:/");
 
       uint64_t uuid = Utils::Hash::sha256_64bit("ASSET:" + path.string());
       Entry entry{
         .uuid = uuid,
         .name = path.filename().string(),
         .path = path.string(),
+        .outPath = outPath,
+        .romPath = romPath,
         .type = type,
       };
 
@@ -95,7 +125,7 @@ void Project::AssetManager::reload() {
       // check if meta-data exists
       auto pathMeta = path;
       pathMeta += ".conf";
-      if (type != FileType::UNKNOWN && std::filesystem::exists(pathMeta))
+      if (type != FileType::UNKNOWN && fs::exists(pathMeta))
       {
         auto doc = Utils::JSON::loadFile(pathMeta);
         if (doc.is_object()) {
@@ -109,11 +139,12 @@ void Project::AssetManager::reload() {
       }
 
       entries[(int)type].push_back(entry);
+      entriesMap[entry.uuid] = static_cast<int>(entries.size() - 1);
     }
   }
 
   auto codePath = getCodePath(project);
-  for (const auto &entry : std::filesystem::directory_iterator{codePath}) {
+  for (const auto &entry : fs::directory_iterator{codePath}) {
     if (entry.is_regular_file()) {
       auto path = entry.path();
       auto ext = path.extension().string();
@@ -177,7 +208,7 @@ void Project::AssetManager::createScript(const std::string &name) {
   auto uuidStr = std::format("{:016X}", uuid);
   uuidStr[0] = 'C'; // avoid leading numbers since it's used as a namespace name
 
-  if (std::filesystem::exists(filePath))return;
+  if (fs::exists(filePath))return;
 
   auto code = defaultScript;
   code = Utils::replaceAll(code, "__UUID__", uuidStr);

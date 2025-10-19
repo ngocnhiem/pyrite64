@@ -38,5 +38,9 @@ add_executable(n64_engine
         engine/include/scene/object.h
         engine/include/scene/components/code.h
         engine/include/scene/componentTable.h
-        engine/include/scene/componentTable.cpp
+
+        engine/include/assets/assetManager.h
+        engine/src/assets/assetManager.cpp
+        engine/include/assets/assetTypes.h
+        engine/src/scene/object.cpp
 )

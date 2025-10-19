@@ -1,0 +1,59 @@
+/**
+* @copyright 2025 - Max Bebök
+* @license MIT
+*/
+#pragma once
+#include <t3d/t3dmodel.h>
+
+#include "assets/assetManager.h"
+#include "lib/matrixManager.h"
+#include "scene/object.h"
+#include "script/scriptTable.h"
+
+namespace P64::Comp
+{
+  struct Model
+  {
+    T3DModel *model{};
+    RingMat4FP matFP{};
+
+    static uint32_t getAllocSize(uint16_t* initData)
+    {
+      return sizeof(Model);
+    }
+
+    static void initDelete(Object& obj, Model* data, uint16_t* initData)
+    {
+      if (initData == nullptr) {
+        data->~Model();
+        return;
+      }
+
+      uint16_t assetIdx = initData[0];
+      new(data) Model();
+
+      data->model = (T3DModel*)AssetManager::getByIndex(assetIdx);
+      assert(data->model != nullptr);
+
+      data->matFP.fillSRT(
+        {0.01f, 0.01f, 0.01f},
+        {0,0,0},
+        {0,0,0}
+      );
+      // auto scriptPtr = Script::getCodeByIndex(initData[0]);
+      // reserved: initData[1];
+    }
+
+    static void update(Object& obj, Model* data) {
+
+    }
+
+    static void draw(Object& obj, Model* data) {
+      t3d_matrix_set(data->matFP.getNext(), true);
+      rspq_block_run(data->model->userBlock);
+      //t3d_model_draw(data->model);
+      //char* funcData = (char*)data + sizeof(Code);
+      //if(data->funcDraw)data->funcDraw(obj, funcData);
+    }
+  };
+}
