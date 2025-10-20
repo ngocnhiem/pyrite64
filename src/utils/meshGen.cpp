@@ -48,3 +48,30 @@ void Utils::Mesh::generateCube(Renderer::Mesh&mesh, float size) {
     mesh.indices.push_back(startIdx + 3);
   }
 }
+
+void Utils::Mesh::generateGrid(Renderer::Mesh&mesh, int size) {
+
+  glm::u8vec4 col{0x80,0x80,0x80,0xFF};
+  glm::u8vec4 colX{0xFF, 0, 0, 0xFF};
+  glm::u8vec4 colY{0, 0xFF, 0, 0xFF};
+  glm::u8vec4 colZ{0, 0, 0xFF, 0xFF};
+
+
+  for (int z=-size; z<=size; z++) {
+    mesh.vertLines.push_back({{ -size, 0.0f, (float)z }, z == 0 ? colX : col});
+    mesh.vertLines.push_back({{  size, 0.0f, (float)z }, z == 0 ? colX : col});
+    mesh.indices.push_back(mesh.vertLines.size() - 2);
+    mesh.indices.push_back(mesh.vertLines.size() - 1);
+  }
+  for (int x=-size; x<=size; x++) {
+    mesh.vertLines.push_back({{ (float)x, 0.0f, -size }, x == 0 ? colZ : col});
+    mesh.vertLines.push_back({{ (float)x, 0.0f,  size }, x == 0 ? colZ : col});
+    mesh.indices.push_back(mesh.vertLines.size() - 2);
+    mesh.indices.push_back(mesh.vertLines.size() - 1);
+  }
+
+  mesh.vertLines.push_back({{ 0.0f, -size, 0.0f }, colY});
+  mesh.vertLines.push_back({{ 0.0f,  size, 0.0f }, colY});
+  mesh.indices.push_back(mesh.vertLines.size() - 2);
+  mesh.indices.push_back(mesh.vertLines.size() - 1);
+}

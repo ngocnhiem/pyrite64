@@ -27,8 +27,8 @@ namespace Editor
       glm::vec2 mousePos{};
       glm::vec2 mousePosStart{};
 
-      Renderer::Object obj{};
-      Renderer::Object obj2{};
+      std::shared_ptr<Renderer::Mesh> meshGrid{};
+      Renderer::Object objGrid{};
 
       void onRenderPass(SDL_GPUCommandBuffer* cmdBuff, Renderer::Scene& renderScene);
       void onCopyPass(SDL_GPUCommandBuffer* cmdBuff, SDL_GPUCopyPass *copyPass);

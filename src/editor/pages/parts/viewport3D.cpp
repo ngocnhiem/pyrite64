@@ -36,17 +36,16 @@ Editor::Viewport3D::Viewport3D()
   auto meshAssetB = ctx.project->getAssets().getByName("box.glb");
   meshAssetB->mesh3D->recreate(*ctx.scene);
 
-  obj.setMesh(meshAsset->mesh3D);
-  obj2.setMesh(meshAssetB->mesh3D);
-
-  obj2.setPos({2,0,1});
+  meshGrid = std::make_shared<Renderer::Mesh>();
+  Utils::Mesh::generateGrid(*meshGrid, 10);
+  meshGrid->recreate(*ctx.scene);
+  objGrid.setMesh(meshGrid);
 
   auto &gizStyle = ImViewGuizmo::GetStyle();
   gizStyle.scale = 0.5f;
   gizStyle.circleRadius = 19.0f;
   gizStyle.labelSize = 1.9f;
   gizStyle.labelColor = IM_COL32(0,0,0,0xFF);
-
   camera.pos = {0,0,0};
 }
 
@@ -80,6 +79,7 @@ void Editor::Viewport3D::onRenderPass(SDL_GPUCommandBuffer* cmdBuff, Renderer::S
   }
 
   renderScene.getPipeline("lines").bind(renderPass3D);
+  objGrid.draw(renderPass3D, cmdBuff);
 
   SDL_EndGPURenderPass(renderPass3D);
 }
@@ -171,12 +171,12 @@ void Editor::Viewport3D::draw() {
   glm::mat4 unit = glm::mat4(1.0f);
   ImGuizmo::SetDrawlist(draw_list);
   ImGuizmo::SetRect(currPos.x, currPos.y, currSize.x, currSize.y);
-  ImGuizmo::DrawGrid(
+  /*ImGuizmo::DrawGrid(
     glm::value_ptr(uniGlobal.cameraMat),
     glm::value_ptr(uniGlobal.projMat),
     glm::value_ptr(unit),
     10.0f
-  );
+  );*/
 
   if (ImViewGuizmo::Rotate(camera.posOffset, camera.rot, gizPos)) {
 
