@@ -128,7 +128,7 @@ namespace Project::Component::Model
     if (isSelected)
     {
       auto center = obj.pos + data.aabb.getCenter();
-      auto halfExt = data.aabb.getHalfExtend() * obj.scale * 128.0f;
+      auto halfExt = data.aabb.getHalfExtend() * obj.scale * 512.0f;
 
       glm::u8vec4 aabbCol{0xAA,0xAA,0xAA,0xFF};
       if (isSelected) {

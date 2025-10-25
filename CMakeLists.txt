@@ -152,6 +152,8 @@ add_executable(p64editor src/main.cpp
         src/utils/container.h
         src/renderer/n64Mesh.h
         src/renderer/n64Mesh.cpp
+        src/renderer/n64/n64Material.h
+        src/renderer/n64/n64Material.cpp
 )
 
 target_include_directories(p64editor PRIVATE

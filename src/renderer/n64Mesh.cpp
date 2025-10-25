@@ -7,8 +7,9 @@
 #include "../project/assetManager.h"
 #include <filesystem>
 
-namespace fs = std::filesystem;
+#include "n64/n64Material.h"
 
+namespace fs = std::filesystem;
 extern SDL_GPUSampler *texSamplerRepeat; // @TODO make sampler manager? is this even needed?
 
 void Renderer::N64Mesh::fromT3DM(const T3DMData &t3dmData, Project::AssetManager &assetManager)
@@ -28,18 +29,7 @@ void Renderer::N64Mesh::fromT3DM(const T3DMData &t3dmData, Project::AssetManager
     part->indicesOffset = mesh.indices.size();
     part->indicesCount = model.triangles.size() * 3;
 
-    part->material.colPrim = {
-      model.material.primColor[0],
-      model.material.primColor[1],
-      model.material.primColor[2],
-      model.material.primColor[3]
-    };
-    part->material.colEnv = {
-      model.material.envColor[0],
-      model.material.envColor[1],
-      model.material.envColor[2],
-      model.material.envColor[3],
-    };
+    N64Material::convert(*part, model.material);
 
     part->texBindings[0].texture = fallbackTex;
     part->texBindings[0].sampler = texSamplerRepeat;

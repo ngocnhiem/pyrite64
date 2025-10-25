@@ -13,7 +13,7 @@ namespace Renderer
 {
   class N64Mesh
   {
-    private:
+    public:
       struct MeshPart
       {
         uint32_t indicesOffset{0};
@@ -22,6 +22,7 @@ namespace Renderer
 
         SDL_GPUTextureSamplerBinding texBindings[2]{};
       };
+    private:
 
       Mesh mesh{};
       std::vector<MeshPart> parts{};

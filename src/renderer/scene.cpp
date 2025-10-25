@@ -32,7 +32,7 @@ Renderer::Scene::Scene()
     .vertLayout = {
       {SDL_GPU_VERTEXELEMENTFORMAT_SHORT4     , offsetof(Renderer::Vertex, pos)},
       {SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM, offsetof(Renderer::Vertex, color)},
-      {SDL_GPU_VERTEXELEMENTFORMAT_USHORT2    , offsetof(Renderer::Vertex, uv)},
+      {SDL_GPU_VERTEXELEMENTFORMAT_SHORT2    ,  offsetof(Renderer::Vertex, uv)},
     }
   });
 

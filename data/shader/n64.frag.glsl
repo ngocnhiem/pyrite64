@@ -22,7 +22,7 @@ void main()
 
   ivec2 texSize = textureSize(texSampler0, 0);
   // repeat
-  uvNorm = ivec2(mod(uvNorm.x, texSize.x), mod(uvNorm.y, texSize.y));
+  uvNorm = ivec2(mod(uvNorm, texSize));
 
   FragColor = texelFetch(texSampler0, uvNorm, 0) * v_color;
 
