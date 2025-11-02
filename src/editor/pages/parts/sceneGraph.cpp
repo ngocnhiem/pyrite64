@@ -73,12 +73,21 @@ namespace
     {
       if (ImGui::BeginPopupContextItem("NodePopup"))
       {
-        if (ImGui::MenuItem(ICON_MDI_PLUS_BOX_OUTLINE " Add Empty")) {
-          ctx.selObjectUUID = scene.addObject(obj)->uuid;
+        if(obj.isGroup)
+        {
+          if (ImGui::MenuItem(ICON_MDI_CUBE_OUTLINE " Add Object")) {
+            ctx.selObjectUUID = scene.addObject(obj)->uuid;
+          }
+
+          if (ImGui::MenuItem(ICON_MDI_VIEW_GRID_PLUS " Add Group")) {
+            auto newObj = scene.addObject(obj);
+            newObj->isGroup = true;
+            ctx.selObjectUUID = newObj->uuid;
+          }
         }
 
         if (obj.parent) {
-          ImGui::Separator();
+          if(obj.isGroup)ImGui::Separator();
           if (ImGui::MenuItem(ICON_MDI_TRASH_CAN " Delete"))deleteObj = &obj;
         }
         ImGui::EndPopup();

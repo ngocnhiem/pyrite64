@@ -37,10 +37,12 @@ Project::Scene::Scene(int id_, const std::string &projectPath)
   Utils::Logger::log("Loading scene: " + std::to_string(id));
   scenePath = projectPath + "/data/scenes/" + std::to_string(id);
 
+  deserialize(Utils::FS::loadTextFile(scenePath + "/scene.json"));
+
   root.id = 0;
   root.name = "Scene";
   root.uuid = Utils::Hash::sha256_64bit(root.name);
-  deserialize(Utils::FS::loadTextFile(scenePath + "/scene.json"));
+  root.isGroup = true;
 }
 
 std::shared_ptr<Project::Object> Project::Scene::addObject(Object &parent) {

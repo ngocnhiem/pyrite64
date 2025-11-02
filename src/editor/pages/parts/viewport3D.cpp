@@ -105,6 +105,24 @@ bool ConnectedToggleButton(const char* text, bool active, bool first, bool last,
   std::shared_ptr<Renderer::Texture> sprites{};
   uint32_t spritesRefCount{0};
 
+  void iterateObjects(
+    Project::Object& parent,
+    std::function<void(Project::Object&, Project::Component::Entry&)> callback
+  )
+  {
+    for(auto& child : parent.children)
+    {
+      if(!child->enabled)continue;
+
+      for(auto &comp : child->components) {
+        callback(*child, comp);
+      }
+
+      // only groups can have children
+      if(!parent.isGroup){ assert(parent.children.empty()); }
+      iterateObjects(*child, callback);
+    }
+  }
 }
 
 Editor::Viewport3D::Viewport3D()
@@ -174,24 +192,18 @@ void Editor::Viewport3D::onRenderPass(SDL_GPUCommandBuffer* cmdBuff, Renderer::S
   uniGlobal.screenSize = glm::vec2{(float)fb.getWidth(), (float)fb.getHeight()};
   SDL_PushGPUVertexUniformData(cmdBuff, 0, &uniGlobal, sizeof(uniGlobal));
   auto &rootObj = scene->getRootObject();
-  for(auto& child : rootObj.children)
-  {
-    if(!child->enabled)continue;
 
-    for(auto &comp : child->components)
-    {
-      auto &def = Project::Component::TABLE[comp.id];
-      if (def.funcDraw3D) {
-        def.funcDraw3D(*child, comp, *this, cmdBuff, renderPass3D);
-      }
+  iterateObjects(rootObj, [&](Project::Object &obj, Project::Component::Entry &comp) {
+    auto &def = Project::Component::TABLE[comp.id];
+    if(def.funcDraw3D) {
+      def.funcDraw3D(obj, comp, *this, cmdBuff, renderPass3D);
     }
-
-    if(child->components.empty())
-    {
+    /*
+    if(child->components.empty()) {
       Utils::Mesh::addSprite(*getSprites(), child->pos, child->uuid, 2);
     }
-    //child.draw(renderPass3D, cmdBuff);
-  }
+    */
+  });
 
   meshLines->recreate(renderScene);
   meshSprites->recreate(renderScene);
@@ -229,19 +241,11 @@ void Editor::Viewport3D::draw()
 
   ctx.scene->clearLights();
   auto &rootObj = scene->getRootObject();
-  for(auto& child : rootObj.children)
-  {
-    if(!child->enabled)continue;
 
-    for(auto &comp : child->components)
-    {
-      auto &def = Project::Component::TABLE[comp.id];
-      if (def.funcUpdate) {
-        def.funcUpdate(*child, comp);
-      }
-    }
-    //child.draw(renderPass3D, cmdBuff);
-  }
+  iterateObjects(rootObj, [&](Project::Object &obj, Project::Component::Entry &comp) {
+    auto &def = Project::Component::TABLE[comp.id];
+    if(def.funcUpdate)def.funcUpdate(obj, comp);
+  });
 
   fb.setClearColor(scene->conf.clearColor);
 
@@ -292,9 +296,12 @@ void Editor::Viewport3D::draw()
     mousePosClick = mousePos;
   }
 
-  ImGui::SetMouseCursor(
-    mouseHeldRight ? ImGuiMouseCursor_None : ImGuiMouseCursor_Arrow
-  );
+  if(isMouseHover)
+  {
+    ImGui::SetMouseCursor(
+      mouseHeldRight ? ImGuiMouseCursor_None : ImGuiMouseCursor_Arrow
+    );
+  }
 
   if (newMouseDown) {
     if (ImGui::IsKeyDown(ImGuiKey_W))camera.pos += camera.rot * glm::vec3(0,0,-moveSpeed);

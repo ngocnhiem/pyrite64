@@ -32,6 +32,7 @@ namespace Project
 
       bool enabled{true};
       bool selectable{true};
+      bool isGroup{false};
 
       std::vector<std::shared_ptr<Object>> children{};
       std::vector<Component::Entry> components{};

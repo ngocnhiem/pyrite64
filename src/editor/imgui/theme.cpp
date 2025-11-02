@@ -41,7 +41,7 @@ void ImGui::applyTheme()
   // Tabs
   colors[ImGuiCol_Tab] = ImVec4(0.18f, 0.18f, 0.22f, 1.00f);
   colors[ImGuiCol_TabHovered] = ImVec4(0.35f, 0.35f, 0.50f, 1.00f);
-  colors[ImGuiCol_TabActive] = ImVec4(0.25f, 0.25f, 0.38f, 1.00f);
+  colors[ImGuiCol_TabSelected] = ImVec4(0.25f, 0.25f, 0.38f, 1.00f);
   colors[ImGuiCol_TabUnfocused] = ImVec4(0.13f, 0.13f, 0.17f, 1.00f);
   colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.20f, 0.20f, 0.25f, 1.00f);
 
@@ -74,10 +74,11 @@ void ImGui::applyTheme()
 
   // Style tweaks
   constexpr float rounding = 3.0f;
+  style.TabBarOverlineSize = 3.0f;
   style.WindowRounding = rounding;
   style.FrameRounding = rounding;
   style.GrabRounding = rounding;
-  style.TabRounding = rounding;
+  style.TabRounding = 0;
   style.PopupRounding = rounding;
   style.ScrollbarRounding = rounding;
   style.WindowPadding = ImVec2(10, 10);

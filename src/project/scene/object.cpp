@@ -23,6 +23,7 @@ namespace
 
     builder.set("selectable", obj.selectable);
     builder.set("enabled", obj.enabled);
+    builder.set("isGroup", obj.isGroup);
 
     builder.set("pos", obj.pos);
     builder.set("rot", obj.rot);
@@ -86,6 +87,7 @@ void Project::Object::deserialize(Scene &scene, const simdjson::simdjson_result<
 
   selectable = Utils::JSON::readBool(doc, "selectable", true);
   enabled = Utils::JSON::readBool(doc, "enabled", true);
+  isGroup = Utils::JSON::readBool(doc, "isGroup", false);
 
   pos = Utils::JSON::readVec3(doc, "pos");
   rot = Utils::JSON::readQuat(doc, "rot");
