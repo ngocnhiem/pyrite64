@@ -14,6 +14,7 @@
 #include "lib/logger.h"
 #include "lib/matrixManager.h"
 #include "assets/assetManager.h"
+#include "lib/math.h"
 #include "scene/componentTable.h"
 #include "script/scriptTable.h"
 
@@ -28,6 +29,7 @@ namespace {
     uint16_t _padding;
     fm_vec3_t pos;
     fm_vec3_t scale;
+    uint32_t packedRot;
     // data follows
   };
 
@@ -112,6 +114,7 @@ void P64::Scene::loadScene() {
       obj->compCount = compCount;
       obj->pos = objEntry->pos;
       obj->scale = objEntry->scale;
+      obj->rot = Math::unpackQuat(objEntry->packedRot);
 
       ptrIn = objFile + sizeof(ObjectEntry);
       while(ptrIn[1] != 0)

@@ -12,6 +12,11 @@
 
 #include "engine/include/scene/objectFlags.h"
 
+namespace T3D
+{
+ #include "tiny3d/tools/gltf_importer/src/math/quantizer.h"
+}
+
 namespace fs = std::filesystem;
 
 namespace
@@ -53,6 +58,9 @@ void Build::buildScene(Project::Project &project, const Project::SceneEntry &sce
     ctx.fileObj.write<uint16_t>(0); // padding
     ctx.fileObj.write(obj.pos);
     ctx.fileObj.write(obj.scale);
+
+    uint32_t quatQuant = T3D::Quantizer::quatTo32Bit({obj.rot.x, obj.rot.y, obj.rot.z, obj.rot.w});
+    ctx.fileObj.write(quatQuant);
 
     // DATA
     for (auto &comp : obj.components) {

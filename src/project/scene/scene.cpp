@@ -15,7 +15,7 @@
 namespace
 {
   constinit uint64_t nextUUID{1};
-  constexpr float DEF_MODEL_SCALE = 1.0f / 64.0f;
+  constexpr float DEF_MODEL_SCALE = 1.0f;
 }
 
 std::string Project::SceneConf::serialize() const {

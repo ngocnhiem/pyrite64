@@ -28,7 +28,9 @@ namespace P64::Script::C0FCD808BF296813
       inp.stick_x / 100.0f,
       inp.stick_y / 100.0f
     };
-    fm_vec3_t camDist{0, 60.0f, 100.0f};
+    fm_vec3_t camDist{0, 100.0f, 120.0f};
+
+    if(inp.btn.d_left)speed *= 10;
 
     float cosA = fm_cosf(data->camAngle);
     float sinA = fm_sinf(data->camAngle);
@@ -48,8 +50,11 @@ namespace P64::Script::C0FCD808BF296813
       move.y,
       move.x * sinA + move.z * cosA
     };
+    if(inp.btn.c_up)moveRotated.y += 1.0f;
+    if(inp.btn.c_down)moveRotated.y -= 1.0f;
 
     obj.pos += moveRotated * speed;
+    debugf("pos: %.2f, %.2f, %.2f\n", obj.pos.x, obj.pos.y, obj.pos.z);
 
     auto &cam = SceneManager::getCurrent().getActiveCamera();
     cam.setTarget(obj.pos);

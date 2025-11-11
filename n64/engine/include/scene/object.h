@@ -38,6 +38,7 @@ namespace P64
       uint32_t _padding{};
 
       // extra data, is overlapping with component data if unused
+      fm_quat_t rot{};
       fm_vec3_t pos{};
       fm_vec3_t scale{};
 

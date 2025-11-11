@@ -15,6 +15,5 @@ namespace P64::Script::C52A4013240F9C81
     if (pressed.a) {
       SceneManager::load(2);
     }
-
   }
 }

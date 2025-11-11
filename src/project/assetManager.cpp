@@ -60,7 +60,6 @@ Project::AssetManager::AssetManager(Project* pr)
   : project{pr}
 {
   defaultScript = Utils::FS::loadTextFile("data/scripts/default.cpp");
-  fallbackTex = std::make_shared<Renderer::Texture>(ctx.gpu, "data/img/fallback.png");
 }
 
 Project::AssetManager::~AssetManager() {
@@ -222,6 +221,14 @@ void Project::AssetManager::reloadAssetByUUID(uint64_t uuid) {
   auto asset = getEntryByUUID(uuid);
   if (!asset)return;
   reloadEntry(*asset, asset->path);
+}
+
+const std::shared_ptr<Renderer::Texture> & Project::AssetManager::getFallbackTexture()
+{
+  if(!fallbackTex) {
+    fallbackTex = std::make_shared<Renderer::Texture>(ctx.gpu, "data/img/fallback.png");
+  }
+  return fallbackTex;
 }
 
 void Project::AssetManager::save()

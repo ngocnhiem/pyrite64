@@ -6,10 +6,6 @@
 #include "lib/logger.h"
 #include "scene/globalState.h"
 
-namespace {
-  constexpr float OVERRIDE_SPEED = 1.2f;
-}
-
 void P64::Camera::update(float deltaTime)
 {
   vpIdx = (vpIdx + 1) % 3;
@@ -17,6 +13,7 @@ void P64::Camera::update(float deltaTime)
 
   //if(needsProjUpdate) {
     t3d_viewport_set_projection(vp, fov, near, far);
+    //vp._normScaleW = 0.04f;
     //needsProjUpdate = false;
   //}
 

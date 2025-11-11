@@ -35,20 +35,15 @@ namespace P64::Comp
       data->model = (T3DModel*)AssetManager::getByIndex(assetIdx);
       assert(data->model != nullptr);
 
-      data->matFP.fillSRT(
-        obj.scale,
-        {0,0,0},
-        obj.pos
-      );
       // auto scriptPtr = Script::getCodeByIndex(initData[0]);
       // reserved: initData[1];
     }
 
     static void update(Object& obj, Model* data) {
       auto mat = data->matFP.getNext();
-      t3d_mat4fp_from_srt_euler(mat,
+      t3d_mat4fp_from_srt(mat,
         obj.scale,
-        {0,0,0},
+        obj.rot,
         obj.pos
       );
     }

@@ -126,9 +126,7 @@ namespace Project
         return nullptr;
       }
 
-      const std::shared_ptr<Renderer::Texture> &getFallbackTexture() {
-        return fallbackTex;
-      }
+      const std::shared_ptr<Renderer::Texture> &getFallbackTexture();
 
       void save();
 

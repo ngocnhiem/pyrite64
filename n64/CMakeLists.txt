@@ -46,4 +46,5 @@ add_executable(n64_engine
         engine/include/scene/components/light.h
         engine/src/scene/lighting.cpp
         engine/include/scene/components/camera.h
+        engine/include/lib/math.h
 )
