@@ -19,6 +19,7 @@ namespace Utils
   {
     u8, s8, u16, s16, u32, s32,
     f32,
+    ASSET_SPRITE
   };
 
   class BinaryFile

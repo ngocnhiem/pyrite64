@@ -21,6 +21,7 @@ namespace
     if (str == "uint32_t") return Utils::DataType::u32;
     if (str == "int32_t") return Utils::DataType::s32;
     if (str == "float") return Utils::DataType::f32;
+    if (str == "AssetRef<sprite_t>") return Utils::DataType::ASSET_SPRITE;
     return Utils::DataType::s32;
   }
 
@@ -35,6 +36,7 @@ namespace
       case Utils::DataType::u32:
       case Utils::DataType::s32:
       case Utils::DataType::f32:
+      case Utils::DataType::ASSET_SPRITE:
       default:
         return 4;
     }

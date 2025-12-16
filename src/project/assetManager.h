@@ -66,6 +66,10 @@ namespace Project
         std::shared_ptr<Renderer::N64Mesh> mesh3D{};
         AssetConf conf{};
         Utils::CPP::Struct params{};
+
+        // imgui selectbox:
+        uint64_t getId() const { return uuid; }
+        const std::string &getName() const { return name; }
       };
 
     private:

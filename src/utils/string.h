@@ -41,4 +41,13 @@ namespace Utils
     }
     return result;
   }
+
+  inline uint64_t parseU64(const std::string &str)
+  {
+    try {
+      return std::stoul(str);
+    } catch (...) {
+      return 0;
+    }
+  }
 }

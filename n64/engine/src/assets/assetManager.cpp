@@ -59,7 +59,7 @@ namespace
 
   AssetHandler assetHandler[] = {
     {nullptr, nullptr},                    // UNKNOWN
-    {nullptr, nullptr},                    // IMAGE
+    {(LoadFunc)sprite_load, (FreeFunc)sprite_free}, // IMAGE
     {nullptr, nullptr},                    // AUDIO
     {(LoadFunc)load_t3dm, (FreeFunc)t3d_model_free},
     {nullptr, nullptr},                    // CODE

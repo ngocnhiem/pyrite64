@@ -46,7 +46,7 @@ namespace ImGui
   inline void VectorComboBox(
     const std::string &name,
     const std::vector<T> &items,
-    uint32_t &id
+    auto &id
   ) {
     int idx = 0;
     for (const auto &item : items) {

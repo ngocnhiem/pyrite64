@@ -9,6 +9,7 @@
 #include "../../../utils/jsonBuilder.h"
 #include "../../../utils/binaryFile.h"
 #include "../../../utils/logger.h"
+#include "../../../utils/string.h"
 
 namespace Project::Component::Code
 {
@@ -71,7 +72,14 @@ namespace Project::Component::Code
       auto val = data.args[field.name];
       if (val.empty())val = field.defaultValue;
       if (val.empty())val = "0";
-      ctx.fileObj.writeAs(val, field.type);
+
+      if(field.type == Utils::DataType::ASSET_SPRITE)
+      {
+        uint64_t uuid = Utils::parseU64(val);
+        ctx.fileObj.write<uint32_t>(ctx.assetUUIDToIdx[uuid]);
+      } else {
+        ctx.fileObj.writeAs(val, field.type);
+      }
     }
   }
 
@@ -122,7 +130,16 @@ namespace Project::Component::Code
             name = metaName->second;
           }
 
-          ImGui::InpTable::addString(name, data.args[field.name]);
+          if(field.type == Utils::DataType::ASSET_SPRITE)
+          {
+            ImGui::InpTable::add(name);
+            const auto &assets = ctx.project->getAssets().getTypeEntries(AssetManager::FileType::IMAGE);
+            uint64_t uuid = Utils::parseU64(data.args[field.name]);
+            ImGui::VectorComboBox("##arg" + std::to_string(idx), assets, uuid);
+            data.args[field.name] = std::to_string(uuid);
+          } else {
+            ImGui::InpTable::addString(name, data.args[field.name]);
+          }
           ++idx;
         }
       }
