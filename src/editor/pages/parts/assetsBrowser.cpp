@@ -45,7 +45,7 @@ void Editor::AssetsBrowser::draw() {
     },
     TabDef{
       .name = ICON_MDI_FILE "  Assets",
-      .fileTypes = {FileType::IMAGE, FileType::AUDIO, FileType::MODEL_3D}
+      .fileTypes = {FileType::IMAGE, FileType::AUDIO, FileType::MODEL_3D, FileType::FONT}
     },
     TabDef{
       .name = ICON_MDI_SCRIPT_OUTLINE "  Scripts",
@@ -120,6 +120,8 @@ void Editor::AssetsBrowser::draw() {
           iconTxt = ICON_MDI_CUBE_OUTLINE;
         } else if (asset.type == FileType::AUDIO) {
           iconTxt = ICON_MDI_MUSIC;
+        } else if (asset.type == FileType::FONT) {
+          iconTxt = ICON_MDI_FORMAT_FONT;
         } else if (asset.type == FileType::CODE_OBJ || asset.type == FileType::CODE_GLOBAL) {
           iconTxt = ICON_MDI_LANGUAGE_CPP;
         }

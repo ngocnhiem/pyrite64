@@ -11,6 +11,7 @@
 #include "scene/globalState.h"
 #include "./audio/audioManagerPrivate.h"
 #include "assets/assetManager.h"
+#include "renderer/drawLayer.h"
 #include "script/globalScript.h"
 
 P64::GlobalState P64::state{};
@@ -65,6 +66,7 @@ int main()
   vi_set_divot(false);
   vi_set_gamma(VI_GAMMA_DISABLE);
 
+  P64::DrawLayer::init(3);
   P64::MatrixManager::reset();
   P64::VI::SwapChain::init();
 

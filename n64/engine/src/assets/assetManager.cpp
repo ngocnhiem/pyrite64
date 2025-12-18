@@ -57,13 +57,16 @@ namespace
     FreeFunc fnFree{};
   };
 
+  namespace AssetType = P64::Assets::Type;
+
   AssetHandler assetHandler[] = {
-    {nullptr, nullptr},                    // UNKNOWN
-    {(LoadFunc)sprite_load, (FreeFunc)sprite_free}, // IMAGE
-    {nullptr, nullptr},                    // AUDIO
-    {(LoadFunc)load_t3dm, (FreeFunc)t3d_model_free},
-    {nullptr, nullptr},                    // CODE
-    {nullptr, nullptr},                    // PREFAB
+    [AssetType::UNKNOWN]  = {nullptr,                  nullptr                 },
+    [AssetType::IMAGE]    = {(LoadFunc)sprite_load,    (FreeFunc)sprite_free   },
+    [AssetType::AUDIO]    = {nullptr,                  nullptr                 },
+    [AssetType::FONT]     = {(LoadFunc)rdpq_font_load, (FreeFunc)rdpq_font_free},
+    [AssetType::MODEL_3D] = {(LoadFunc)load_t3dm,      (FreeFunc)t3d_model_free},
+    [AssetType::CODE]     = {nullptr,                  nullptr                 },
+    [AssetType::PREFAB]   = {nullptr,                  nullptr                 },
   };
 
   constinit AssetTable* assetTable{nullptr};
@@ -107,4 +110,15 @@ void* P64::AssetManager::getByIndex(uint32_t idx) {
 
   return res;
 
+}
+
+void* P64::AssetManager::getByFilePath(const std::string &path)
+{
+  for (uint32_t i = 0; i < assetTable->count; ++i) {
+    auto &entry = assetTable->entries[i];
+    if (path == entry.path) {
+      return getByIndex(i);
+    }
+  }
+  return nullptr;
 }

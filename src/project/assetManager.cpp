@@ -136,6 +136,9 @@ void Project::AssetManager::reload() {
       } else if (ext == ".glb" || ext == ".gltf") {
         type = FileType::MODEL_3D;
         outPath = changeExt(outPath, ".t3dm");
+      } else if (ext == ".ttf") {
+        type = FileType::FONT;
+        outPath = changeExt(outPath, ".font64");
       }
 
       auto romPath = outPath;

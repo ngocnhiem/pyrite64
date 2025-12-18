@@ -15,6 +15,7 @@
 #include "audio/audioManager.h"
 #include "../audio/audioManagerPrivate.h"
 #include "debug/debugDraw.h"
+#include "renderer/drawLayer.h"
 #include "scene/componentTable.h"
 #include "script/globalScript.h"
 
@@ -165,6 +166,13 @@ void P64::Scene::draw([[maybe_unused]] float deltaTime)
     rdpq_mode_fog(0);
   rdpq_mode_end();
 
+  DrawLayer::use(DrawLayer::LAYER_2D);
+    rdpq_sync_pipe();
+    rdpq_sync_load();
+    rdpq_sync_tile();
+    rdpq_set_mode_standard();
+  DrawLayer::useDefault();
+
   if(conf.flags & SceneConf::FLAG_CLR_DEPTH) {
     t3d_screen_clear_depth();
   }
@@ -207,11 +215,6 @@ void P64::Scene::draw([[maybe_unused]] float deltaTime)
 
   // 2D Pass, once for screen
 
-  rdpq_sync_pipe();
-  rdpq_set_mode_standard();
-
-  rdpq_sync_load();
-  rdpq_sync_tile();
 
   GlobalScript::callHooks(GlobalScript::HookType::SCENE_PRE_DRAW_2D);
 
@@ -219,6 +222,8 @@ void P64::Scene::draw([[maybe_unused]] float deltaTime)
   Debug::printf(16, 16, "FPS: %.2f\n", (double)VI::SwapChain::getFPS());
 
   GlobalScript::callHooks(GlobalScript::HookType::SCENE_POST_DRAW_2D);
+
+  P64::DrawLayer::drawAll();
 
   collScene.debugDraw(collDebugDraw, collDebugDraw);
 }

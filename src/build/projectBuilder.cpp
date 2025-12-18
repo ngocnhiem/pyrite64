@@ -51,6 +51,7 @@ namespace
             break;
 
           case AT::MODEL_3D: // @TODO: remove here
+          case AT::FONT:
             assetList.push_back(entry.outPath);
 
           case AT::AUDIO:
@@ -71,6 +72,12 @@ bool Build::buildProject(std::string path)
 {
   Project::Project project{path};
   Utils::Logger::log("Building project...");
+
+  #if defined(_WIN32)
+    _putenv_s("N64_INST", project.conf.pathN64Inst.c_str());
+  #else
+    setenv("N64_INST", project.conf.pathN64Inst.c_str(), 0);
+  #endif
 
   auto enginePath = fs::current_path() / "n64" / "engine";
   enginePath = fs::absolute(enginePath);
@@ -158,6 +165,13 @@ bool Build::buildProject(std::string path)
   bool success = buildT3DMAssets(project, sceneCtx);
   if(!success) {
     Utils::Logger::log("T3DM Asset build failed!", Utils::Logger::LEVEL_ERROR);
+    return false;
+  }
+
+  // Fonts
+  success = buildFontAssets(project, sceneCtx);
+  if(!success) {
+    Utils::Logger::log("Font Asset build failed!", Utils::Logger::LEVEL_ERROR);
     return false;
   }
 

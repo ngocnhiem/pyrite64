@@ -54,4 +54,7 @@ add_executable(n64_engine
         engine/include/script/globalScript.h
         engine/include/scene/event.h
         engine/src/scene/components/collMesh.cpp
+        engine/src/libdragon/rspq.h
+        engine/include/renderer/drawLayer.h
+        engine/src/renderer/drawLayer.cpp
 )

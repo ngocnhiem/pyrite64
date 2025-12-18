@@ -167,6 +167,7 @@ add_executable(p64editor src/main.cpp
         src/build/t3dmBuilder.cpp
         src/build/collisionBuilder.cpp
         src/project/component/types/compCollBody.cpp
+        src/build/fontBuilder.cpp
 )
 
 target_include_directories(p64editor PRIVATE

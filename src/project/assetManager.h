@@ -34,6 +34,7 @@ namespace Project
         UNKNOWN = 0,
         IMAGE,
         AUDIO,
+        FONT,
         MODEL_3D,
         CODE_OBJ,
         CODE_GLOBAL,
