@@ -62,7 +62,6 @@ struct Property
 {
   std::string name{};
   uint64_t id{};
-  bool override{false};
   T value{};
 
   constexpr Property() = default;

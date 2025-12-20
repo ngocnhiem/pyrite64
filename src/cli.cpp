@@ -41,7 +41,9 @@ CLI::Result CLI::run(int argc, char** argv)
   auto cmd = prog.get<std::string>("--cmd");
   auto projPath = prog.get<std::string>("--project");
 
-  Utils::Logger::setOutput([](const std::string &msg) {printf(msg.c_str());});
+  Utils::Logger::setOutput([](const std::string &msg) {
+    puts(msg.c_str());
+  });
 
   printf("Pyrite64 - CLI\n");
   bool res = false;
