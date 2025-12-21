@@ -45,16 +45,21 @@ namespace {
   }
 }
 
-void P64::Scene::loadScene() {
+void P64::Scene::loadSceneConfig()
+{
   scenePath[sizeof(scenePath)-3] = '0' + id;
   scenePath[sizeof(scenePath)-2] = '\0';
 
   {
-    // @TODO: load into
     auto *tmp = (SceneConf*)asset_load(scenePath, nullptr);
     conf = *tmp;
     free(tmp);
   }
+}
+
+void P64::Scene::loadScene() {
+  scenePath[sizeof(scenePath)-3] = '0' + id;
+  scenePath[sizeof(scenePath)-2] = '\0';
 
   cameras.clear();
 

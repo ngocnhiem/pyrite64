@@ -57,4 +57,6 @@ add_executable(n64_engine
         engine/src/libdragon/rspq.h
         engine/include/renderer/drawLayer.h
         engine/src/renderer/drawLayer.cpp
+        engine/src/renderer/pipeline.h
+        engine/src/renderer/pipelineDefault.cpp
 )

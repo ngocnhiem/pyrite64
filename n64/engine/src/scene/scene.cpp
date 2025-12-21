@@ -14,6 +14,7 @@
 #include "assets/assetManager.h"
 #include "audio/audioManager.h"
 #include "../audio/audioManagerPrivate.h"
+#include "../renderer/pipeline.h"
 #include "debug/debugDraw.h"
 #include "renderer/drawLayer.h"
 #include "scene/componentTable.h"
@@ -29,25 +30,19 @@ P64::Scene::Scene(uint16_t sceneId, Scene** ref)
 {
   if(ref)*ref = this;
   Debug::init();
-  loadScene();
+
+  renderPipeline = new RenderPipelineDefault(*this);
+
+  loadSceneConfig();
 
   state.screenSize[0] = conf.screenWidth;
   state.screenSize[1] = conf.screenHeight;
 
-  tex_format_t fmt = (conf.flags & SceneConf::FLAG_SCR_32BIT) ? FMT_RGBA32 : FMT_RGBA16;
-  for(auto &fb : surfFbColor) {
-    fb = surface_alloc(fmt, state.screenSize[0], state.screenSize[1]);
-  }
-
-  VI::SwapChain::setFrameBuffers(surfFbColor);
-  VI::SwapChain::setDrawPass([this](surface_t *surf, uint32_t fbIndex, auto done) {
-    rdpq_attach(surf, &P64::Mem::allocDepthBuffer(P64::state.screenSize[0], P64::state.screenSize[1]));
-    draw(1.0f / 60.0f);
-    Debug::draw(static_cast<uint16_t*>(surf->buffer));
-    rdpq_detach_cb((void(*)(void*))((void*)done), (void*)fbIndex);
-  });
+  renderPipeline->init();
 
   VI::SwapChain::start();
+
+  loadScene();
 
   Log::info("Scene %d Loaded", getId());
 }
@@ -61,10 +56,6 @@ P64::Scene::~Scene()
   if(objStaticMats)free(objStaticMats);
   free(stringTable);
 
-  for(auto &fb : surfFbColor) {
-    surface_free(&fb);
-  }
-
   for(auto obj : objects) {
     obj->~Object();
     free(obj);
@@ -74,6 +65,8 @@ P64::Scene::~Scene()
   MatrixManager::reset();
   AssetManager::freeAll();
   Debug::destroy();
+
+  delete renderPipeline;
 }
 
 void P64::Scene::update(float deltaTime)
@@ -96,8 +89,6 @@ void P64::Scene::update(float deltaTime)
   for(auto obj : objects)
   {
     if(!obj->isEnabled())continue;
-
-    //Debug::drawAABB(obj->pos, {10.0f, 10.0f, 10.0f}, {0xFF,0,0,0x40});
 
     auto compRefs = obj->getCompRefs();
 
@@ -149,30 +140,7 @@ void P64::Scene::update(float deltaTime)
 
 void P64::Scene::draw([[maybe_unused]] float deltaTime)
 {
-   rdpq_mode_begin();
-    rdpq_set_mode_standard();
-    rdpq_mode_antialias(AA_NONE);
-    rdpq_mode_zbuf(true, true);
-    rdpq_mode_persp(true);
-    rdpq_mode_filter(FILTER_BILINEAR);
-    rdpq_mode_dithering(DITHER_NONE_NONE);
-    rdpq_mode_blender(0);
-    rdpq_mode_fog(0);
-  rdpq_mode_end();
-
-  DrawLayer::use(DrawLayer::LAYER_2D);
-    rdpq_sync_pipe();
-    rdpq_sync_load();
-    rdpq_sync_tile();
-    rdpq_set_mode_standard();
-  DrawLayer::useDefault();
-
-  if(conf.flags & SceneConf::FLAG_CLR_DEPTH) {
-    t3d_screen_clear_depth();
-  }
-  if(conf.flags & SceneConf::FLAG_CLR_COLOR) {
-    t3d_screen_clear_color(conf.clearColor);
-  }
+  renderPipeline->preDraw();
 
   // 3D Pass, for every active camera
   for(auto &cam : cameras)
@@ -181,9 +149,7 @@ void P64::Scene::draw([[maybe_unused]] float deltaTime)
     cam->attach();
 
     lighting.apply();
-
     t3d_matrix_push_pos(1);
-    //rspq_block_run(dplObjects);
 
     GlobalScript::callHooks(GlobalScript::HookType::SCENE_PRE_DRAW_3D);
 
@@ -203,26 +169,19 @@ void P64::Scene::draw([[maybe_unused]] float deltaTime)
     }
 
     GlobalScript::callHooks(GlobalScript::HookType::SCENE_POST_DRAW_3D);
-
     t3d_matrix_pop(1);
   }
 
-  // 2D Pass, once for screen
+  DrawLayer::use(DrawLayer::LAYER_2D);
+    Debug::printStart();
+    Debug::printf(16, 16, "%.2f\n", (double)VI::SwapChain::getFPS());
 
+    heap_stats_t heap{};
+    sys_get_heap_stats(&heap);
+    Debug::printf(16, 16+9, "%.4f\n", heap.used / 1024.0);
+  DrawLayer::useDefault();
 
-  GlobalScript::callHooks(GlobalScript::HookType::SCENE_PRE_DRAW_2D);
-
-  Debug::printStart();
-  Debug::printf(16, 16, "%.2f\n", (double)VI::SwapChain::getFPS());
-
-  heap_stats_t heap{};
-  sys_get_heap_stats(&heap);
-  Debug::printf(16, 16+9, "%.4f\n", heap.used / 1024.0);
-
-  GlobalScript::callHooks(GlobalScript::HookType::SCENE_POST_DRAW_2D);
-
-  P64::DrawLayer::drawAll();
-
+  renderPipeline->draw();
   collScene.debugDraw(collDebugDraw, collDebugDraw);
 }
 

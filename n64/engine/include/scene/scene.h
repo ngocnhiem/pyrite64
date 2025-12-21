@@ -14,6 +14,8 @@
 
 namespace P64
 {
+  class RenderPipeline;
+
   struct SceneConf {
     // clears depth/color or not
     constexpr static uint32_t FLAG_CLR_DEPTH = 1 << 0;
@@ -31,13 +33,14 @@ namespace P64
   class Scene
   {
     private:
-      std::vector<P64::Camera*> cameras{};
-      P64::Camera *camMain{nullptr};
+      std::vector<Camera*> cameras{};
+      Camera *camMain{nullptr};
 
-      surface_t surfFbColor[3]{};
       T3DMat4FP *objStaticMats{nullptr};
       char* stringTable{nullptr};
       rspq_block_t *dplObjects{nullptr};
+
+      RenderPipeline *renderPipeline{nullptr};
 
       // @TODO: avoid vector + fragmented alloc
       std::vector<Object*> objects{};
@@ -53,6 +56,7 @@ namespace P64
       SceneConf conf{};
       uint16_t id;
 
+      void loadSceneConfig();
       void loadScene();
 
     public:
@@ -62,6 +66,7 @@ namespace P64
       void update(float deltaTime);
       void draw(float deltaTime);
 
+      [[nodiscard]] const SceneConf& getConf() const { return conf; }
       [[nodiscard]] uint16_t getId() const { return id; }
       [[nodiscard]] Camera* getCamera(uint32_t index = 0) { return cameras[index]; }
       [[nodiscard]] Camera& getActiveCamera() { return *camMain; }

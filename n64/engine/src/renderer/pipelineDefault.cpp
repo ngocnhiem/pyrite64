@@ -1,0 +1,68 @@
+/**
+* @copyright 2025 - Max Bebök
+* @license MIT
+*/
+#include "pipeline.h"
+#include "debug/debugDraw.h"
+#include "lib/memory.h"
+#include "renderer/drawLayer.h"
+#include "scene/globalState.h"
+#include "scene/scene.h"
+#include "vi/swapChain.h"
+
+void P64::RenderPipelineDefault::init()
+{
+  tex_format_t fmt = (scene.getConf().flags & SceneConf::FLAG_SCR_32BIT) ? FMT_RGBA32 : FMT_RGBA16;
+  for(auto &fb : surfFbColor) {
+    fb = surface_alloc(fmt, state.screenSize[0], state.screenSize[1]);
+  }
+
+  VI::SwapChain::setFrameBuffers(surfFbColor);
+
+  VI::SwapChain::setDrawPass([this](surface_t *surf, uint32_t fbIndex, auto done) {
+    rdpq_attach(surf, &Mem::allocDepthBuffer(state.screenSize[0], state.screenSize[1]));
+    scene.draw(1.0f / 60.0f);
+    Debug::draw(static_cast<uint16_t*>(surf->buffer));
+    rdpq_detach_cb((void(*)(void*))((void*)done), (void*)fbIndex);
+  });
+}
+
+P64::RenderPipelineDefault::~RenderPipelineDefault()
+{
+  for(auto &fb : surfFbColor) {
+    if(fb.buffer)surface_free(&fb);
+  }
+}
+
+void P64::RenderPipelineDefault::preDraw()
+{
+  rdpq_mode_begin();
+    rdpq_set_mode_standard();
+    rdpq_mode_antialias(AA_NONE);
+    rdpq_mode_zbuf(true, true);
+    rdpq_mode_persp(true);
+    rdpq_mode_filter(FILTER_BILINEAR);
+    rdpq_mode_dithering(DITHER_NONE_NONE);
+    rdpq_mode_blender(0);
+    rdpq_mode_fog(0);
+  rdpq_mode_end();
+
+  DrawLayer::use(DrawLayer::LAYER_2D);
+    rdpq_sync_pipe();
+    rdpq_sync_load();
+    rdpq_sync_tile();
+    rdpq_set_mode_standard();
+  DrawLayer::useDefault();
+
+  if(scene.getConf().flags & SceneConf::FLAG_CLR_DEPTH) {
+    t3d_screen_clear_depth();
+  }
+  if(scene.getConf().flags & SceneConf::FLAG_CLR_COLOR) {
+    t3d_screen_clear_color(scene.getConf().clearColor);
+  }
+}
+
+void P64::RenderPipelineDefault::draw()
+{
+  DrawLayer::drawAll();
+}
