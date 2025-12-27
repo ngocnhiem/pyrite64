@@ -147,6 +147,29 @@ namespace ImTable
     if(disabled)ImGui::BeginDisabled();
   }
 
+  inline void addBitMask8(const std::string &name, uint32_t &value)
+  {
+    add(name);
+    bool disabled = (obj && obj->uuidPrefab.value);
+    if(disabled)ImGui::BeginDisabled();
+    auto labelHidden = "##" + name;
+    // 8 checkboxes
+    for (int i = 0; i < 8; ++i) {
+      bool bit = (value & (1 << i)) != 0;
+      if (ImGui::Checkbox(labelHidden.c_str(), &bit)) {
+        if (bit) {
+          value |= (1 << i);
+        } else {
+          value &= ~(1 << i);
+        }
+      }
+      labelHidden += "1";
+      if (i < 7)ImGui::SameLine();
+    }
+
+    if(disabled)ImGui::EndDisabled();
+  }
+
   template<typename T>
   bool typedInput(T *value)
   {

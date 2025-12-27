@@ -73,7 +73,7 @@ int main()
 
   // auto-load fonts marked as such
   for(uint32_t fontIdx=0; fontIdx < projectConf.autoLoadFonts.size(); fontIdx++) {
-    debugf("Auto-load font slot %d: asset index %d\n", fontIdx, projectConf.autoLoadFonts[fontIdx]);
+    //debugf("Auto-load font slot %d: asset index %d\n", fontIdx, projectConf.autoLoadFonts[fontIdx]);
     if(projectConf.autoLoadFonts[fontIdx] < 0xFFFF) {
       auto font = (rdpq_font_t*)P64::AssetManager::getByIndex(projectConf.autoLoadFonts[fontIdx]);
       rdpq_text_register_font(fontIdx, font);

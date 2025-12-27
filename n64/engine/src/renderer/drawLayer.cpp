@@ -102,7 +102,7 @@ void P64::DrawLayer::draw(uint32_t layerIdx)
   assertf(layerIdx-1 < layers.size(), "Invalid layer index %lu", layerIdx);
 
   auto &layer = layers[layerIdx-1];
-  debugf("DrawLayer: Drawing layer %d (ptr=%p, curr=%p, size=%ld)\n", layerIdx, layer[frameIdx].pointer, layer[frameIdx].current, layer[frameIdx].current - layer[frameIdx].pointer);
+  //debugf("DrawLayer: Drawing layer %d (ptr=%p, curr=%p, size=%ld)\n", layerIdx, layer[frameIdx].pointer, layer[frameIdx].current, layer[frameIdx].current - layer[frameIdx].pointer);
   LD::RSPQ::exec(layer[frameIdx].pointer, layer[frameIdx].current);
 }
 

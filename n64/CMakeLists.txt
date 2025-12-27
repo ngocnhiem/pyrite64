@@ -75,4 +75,6 @@ add_executable(n64_engine
         engine/src/renderer/bigtex/rspBigTex.cpp
         engine/include/scene/components/audio2d.h
         engine/src/scene/components/audio2d.cpp
+        engine/src/scene/components/collBody.cpp
+        engine/include/collision/flags.h
 )

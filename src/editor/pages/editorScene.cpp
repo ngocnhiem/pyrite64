@@ -104,10 +104,6 @@ void Editor::Scene::draw()
 
   if (ctx.project->getScenes().getLoadedScene()) {
 
-    ImGui::Begin("Layers");
-    layerInspector.draw();
-    ImGui::End();
-
     ImGui::Begin("Graph");
       sceneGraph.draw();
     ImGui::End();
@@ -115,6 +111,11 @@ void Editor::Scene::draw()
     ImGui::Begin("Scene");
       sceneInspector.draw();
     ImGui::End();
+
+    ImGui::Begin("Layers");
+      layerInspector.draw();
+    ImGui::End();
+
   }
 
   ImGui::Begin("Log");

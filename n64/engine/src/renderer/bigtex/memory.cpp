@@ -34,8 +34,7 @@ namespace P64::Renderer::BigTex
     if(is_memory_expanded()) { // With 8MB, we reserve the upper 4MB (excl. the stack) for the frame-buffers
       // first limit the upper heap to match against the start of our first buffer
       oldSbrkTop = LD::sbrkSetTop((void*)FB_BANK_ADDR[0]);
-
-      debugf("sbrk_top: %p -> %p\n", oldSbrkTop, oldSbrkTop);
+      //debugf("sbrk_top: %p -> %p\n", oldSbrkTop, oldSbrkTop);
 
       zBuffer = surface_make(UncachedAddr(FB_BANK_ADDR[4]), FMT_RGBA16, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH*2);
       return {

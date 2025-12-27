@@ -8,19 +8,30 @@
 #include "../../../utils/json.h"
 #include "../../../utils/jsonBuilder.h"
 #include "../../../utils/binaryFile.h"
-#include "../../../utils/logger.h"
 #include "../../assetManager.h"
 #include "../../../editor/pages/parts/viewport3D.h"
 #include "../../../renderer/scene.h"
 #include "../../../utils/meshGen.h"
 
+#include "../../../../n64/engine/include/collision/flags.h"
+
+namespace
+{
+  constexpr int32_t TYPE_BOX      = 0;
+  constexpr int32_t TYPE_SPHERE   = 1;
+  constexpr int32_t TYPE_CYLINDER = 2;
+}
+
 namespace Project::Component::CollBody
 {
   struct Data
   {
-    glm::vec3 halfExtend{};
-    glm::vec3 offset{};
-    int type{};
+    PROP_VEC3(halfExtend);
+    PROP_VEC3(offset);
+    PROP_S32(type);
+    PROP_BOOL(isTrigger);
+    PROP_U32(maskRead);
+    PROP_U32(maskWrite);
   };
 
   std::shared_ptr<void> init(Object &obj) {
@@ -30,27 +41,41 @@ namespace Project::Component::CollBody
 
   std::string serialize(const Entry &entry) {
     Data &data = *static_cast<Data*>(entry.data.get());
-    Utils::JSON::Builder builder{};
-    builder.set("halfExtend", data.halfExtend);
-    builder.set("offset", data.offset);
-    builder.set("type", data.type);
-    return builder.toString();
+    return Utils::JSON::Builder{}
+      .set(data.halfExtend)
+      .set(data.offset)
+      .set(data.type)
+      .set(data.isTrigger)
+      .set(data.maskRead)
+      .set(data.maskWrite)
+      .toString();
   }
 
   std::shared_ptr<void> deserialize(simdjson::simdjson_result<simdjson::dom::object> &doc) {
     auto data = std::make_shared<Data>();
-    data->halfExtend = Utils::JSON::readVec3(doc, "halfExtend", glm::vec3{1.0f, 1.0f, 1.0f});
-    data->offset = Utils::JSON::readVec3(doc, "offset");
-    data->type = Utils::JSON::readInt(doc, "type");
+    Utils::JSON::readProp(doc, data->halfExtend, glm::vec3{1.0f, 1.0f, 1.0f});
+    Utils::JSON::readProp(doc, data->offset);
+    Utils::JSON::readProp(doc, data->type);
+    Utils::JSON::readProp(doc, data->isTrigger, false);
+    Utils::JSON::readProp(doc, data->maskRead, 0xFFu);
+    Utils::JSON::readProp(doc, data->maskWrite, 0xFFu);
     return data;
   }
 
-  void build(Object&, Entry &entry, Build::SceneCtx &ctx)
+  void build(Object& obj, Entry &entry, Build::SceneCtx &ctx)
   {
     Data &data = *static_cast<Data*>(entry.data.get());
-    ctx.fileObj.write(data.halfExtend);
-    ctx.fileObj.write(data.offset);
-    ctx.fileObj.write<uint8_t>(data.type);
+    ctx.fileObj.write(data.halfExtend.resolve(obj.propOverrides));
+    ctx.fileObj.write(data.offset.resolve(obj.propOverrides));
+
+    uint8_t flags = data.type.resolve(obj.propOverrides) == TYPE_BOX ? Coll::BCSFlags::SHAPE_BOX : 0;
+    if(data.isTrigger.resolve(obj.propOverrides)) {
+      flags |= Coll::BCSFlags::TRIGGER;
+    }
+
+    ctx.fileObj.write<uint8_t>(flags);
+    ctx.fileObj.write<uint8_t>(data.maskRead.resolve(obj.propOverrides));
+    ctx.fileObj.write<uint8_t>(data.maskWrite.resolve(obj.propOverrides));
   }
 
   void draw(Object &obj, Entry &entry)
@@ -60,15 +85,20 @@ namespace Project::Component::CollBody
     if (ImTable::start("Comp", &obj)) {
       ImTable::add("Name", entry.name);
 
-      ImTable::addComboBox("Type", data.type, {"Box", "Sphere", "Cylinder"});
-      if(data.type == 1) {
-        ImTable::add("Size", data.halfExtend.y);
-        data.halfExtend.x = data.halfExtend.y;
-        data.halfExtend.z = data.halfExtend.y;
+      auto &ext = data.halfExtend.resolve(obj.propOverrides);
+
+      ImTable::addComboBox("Type", data.type.value, {"Box", "Sphere", "Cylinder"});
+      if(data.type.resolve(obj.propOverrides) == TYPE_SPHERE) {
+        ImTable::add("Size", ext.y);
+        ext.x = ext.y;
+        ext.z = ext.y;
       } else {
-        ImTable::add("Size", data.halfExtend);
+        ImTable::addObjProp("Size", data.halfExtend);
       }
-      ImTable::add("Offset", data.offset);
+      ImTable::addObjProp("Offset", data.offset);
+      ImTable::addObjProp("Trigger", data.isTrigger);
+      ImTable::addBitMask8("Mask Read", data.maskRead.resolve(obj.propOverrides));
+      ImTable::addBitMask8("Mask Write", data.maskWrite.resolve(obj.propOverrides));
 
       ImTable::end();
     }
@@ -79,18 +109,19 @@ namespace Project::Component::CollBody
     Data &data = *static_cast<Data*>(entry.data.get());
     auto &objPos = obj.pos.resolve(obj.propOverrides);
 
-    if(data.type == 0) // Box
-    {
-      glm::vec3 center = objPos + data.offset;
-      glm::vec3 halfExt = data.halfExtend;
+    glm::vec3 halfExt = data.halfExtend.resolve(obj.propOverrides);
+    glm::vec3 center = objPos + data.offset.resolve(obj.propOverrides);
+    auto type = data.type.resolve(obj.propOverrides);
 
+    if(type == TYPE_BOX) // Box
+    {
       glm::vec4 aabbCol{0.0f, 1.0f, 1.0f, 1.0f};
 
       Utils::Mesh::addLineBox(*vp.getLines(), center, halfExt, aabbCol);
       Utils::Mesh::addLineBox(*vp.getLines(), center, halfExt + 0.002f, aabbCol);
-    } else if(data.type == 1) // Sphere
+    } else if(type == TYPE_SPHERE) // Sphere
     {
-      Utils::Mesh::addLineSphere(*vp.getLines(), objPos + data.offset, data.halfExtend, glm::vec4{0.0f, 1.0f, 1.0f, 1.0f});
+      Utils::Mesh::addLineSphere(*vp.getLines(), center, halfExt, glm::vec4{0.0f, 1.0f, 1.0f, 1.0f});
     }
   }
 }

@@ -5,6 +5,7 @@
 #include "assetsBrowser.h"
 
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "../../imgui/helper.h"
 #include "../../../context.h"
 
@@ -12,8 +13,6 @@ using FileType = Project::AssetManager::FileType;
 
 namespace
 {
-  constexpr int ICON_MAX_SIZE = 64;
-
   constexpr int TAB_IDX_SCENES = 0;
   constexpr int TAB_IDX_ASSETS = 1;
   constexpr int TAB_IDX_SCRIPTS = 2;
@@ -91,14 +90,19 @@ void Editor::AssetsBrowser::draw() {
   ImGui::SameLine();
   ImGui::BeginChild("RIGHT");
 
-  float imageSize = 48;
+  float imageSize = 64;
   float itemWidth = imageSize + 18;
   float currentWidth = 0.0f;
   ImVec2 textBtnSize{imageSize+12, imageSize+8};
 
+  float cursorStartX = ImGui::GetCursorPosX();
+  float cursorY = ImGui::GetCursorPosY();
+
   auto checkLineBreak = [&]() {
-    if ((currentWidth+itemWidth) > availWidth) {
+    if ((currentWidth+itemWidth*2) > availWidth) {
       currentWidth = 0.0f;
+      cursorY += imageSize + 28;
+      ImGui::SetCursorPos({cursorStartX, cursorY});
     } else {
       if (currentWidth != 0)ImGui::SameLine();
     }
@@ -136,16 +140,51 @@ void Editor::AssetsBrowser::draw() {
       }
 
       bool clicked{false};
+
+      auto sPos = ImGui::GetCursorScreenPos();
+      {
+        auto size = ImGui::CalcTextSize(asset.name.c_str());
+        ImVec2 rextMin{sPos.x,                sPos.y + imageSize + 8};
+        ImVec2 rextMax{sPos.x + imageSize+14, sPos.y + imageSize + 8 + 16};
+
+        auto drawText = asset.name;
+        if((size.x+3) > (rextMax.x - rextMin.x))
+        {
+          ImGui::RenderTextEllipsis(
+            ImGui::GetWindowDrawList(), rextMin, rextMax, 0,
+            asset.name.c_str(), asset.name.c_str() + asset.name.size(),
+            nullptr
+          );
+        } else {
+          ImGui::GetWindowDrawList()->AddText(
+            {rextMin.x + ((rextMax.x - rextMin.x) - size.x) * 0.5f,
+             rextMin.y + ((rextMax.y - rextMin.y) - size.y) * 0.5f},
+            ImGui::GetColorU32(ImGuiCol_Text),
+            asset.name.c_str()
+          );
+        }
+
+        /*ImGui::RenderTextEllipsis(
+          ImGui::GetWindowDrawList(),
+          {sPos.x,                sPos.y + imageSize + 6},
+          {sPos.x + imageSize+18, sPos.y + imageSize + 6 + 16},
+          0,
+          asset.name.c_str(), asset.name.c_str() + asset.name.size(),
+          nullptr
+        );*/
+      }
+
       if(icon._TexID)
       {
         clicked = ImGui::ImageButton(asset.name.c_str(), icon,
           {imageSize, imageSize}, {0,0}, {1,1}, {0,0,0,0},
           {1,1,1, asset.conf.exclude ? 0.25f : 1.0f}
         );
+
       } else {
-        ImGui::PushFont(nullptr, 32.0f);
+        ImGui::PushFont(nullptr, 40.0f);
         ImGui::PushID((int)asset.uuid);
-        clicked = ImGui::Button(iconTxt, textBtnSize);
+          clicked = ImGui::Button(iconTxt, textBtnSize);
         ImGui::PopID();
         ImGui::PopFont();
       }
@@ -219,6 +258,8 @@ void Editor::AssetsBrowser::draw() {
     }
     ImGui::PopFont();
   }
+
+  ImGui::Dummy({0, 10});
 
   if(ImGui::BeginPopup("NewScript"))
   {

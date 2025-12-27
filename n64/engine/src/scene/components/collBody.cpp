@@ -12,7 +12,9 @@ namespace
   {
     fm_vec3_t halfExtend{};
     fm_vec3_t offset{};
-    uint8_t type{};
+    uint8_t flags{};
+    uint8_t maskRead{};
+    uint8_t maskWrite{};
   };
 }
 
@@ -35,9 +37,9 @@ namespace P64::Comp
     data->bcs = {
       .center = obj.pos + data->offset,
       .halfExtend = initData->halfExtend,
-      .maskRead = 0xFF,
-      .maskWrite = 0xFF,
-      .flags = initData->type == 0 ? Coll::BCSFlags::SHAPE_BOX : (uint8_t)0,
+      .maskRead = initData->maskRead,
+      .maskWrite = initData->maskWrite,
+      .flags = initData->flags,
     };
     coll.registerBCS(&data->bcs);
   }
