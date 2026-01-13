@@ -65,6 +65,7 @@ void Editor::Scene::draw()
 
     // Center
     ImGui::DockBuilderDockWindow("3D-Viewport", dockSpaceID);
+    ImGui::DockBuilderDockWindow("Node-Editor", dockSpaceID);
 
     // Left
     //ImGui::DockBuilderDockWindow("Project", dockLeftID);
@@ -83,6 +84,10 @@ void Editor::Scene::draw()
 
     ImGui::DockBuilderFinish(dockSpaceID);
   }
+
+  ImGui::Begin("Node-Editor");
+  nodeEditor.draw();
+  ImGui::End();
 
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
   ImGui::Begin("3D-Viewport");

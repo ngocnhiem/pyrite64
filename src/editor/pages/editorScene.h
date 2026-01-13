@@ -7,6 +7,7 @@
 #include "parts/assetsBrowser.h"
 #include "parts/layerInspector.h"
 #include "parts/logWindow.h"
+#include "parts/nodeEditor.h"
 #include "parts/objectInspector.h"
 #include "parts/projectSettings.h"
 #include "parts/sceneGraph.h"
@@ -21,6 +22,7 @@ namespace Editor
       Viewport3D viewport3d{};
 
       // Editors
+      NodeEditor nodeEditor{};
       ProjectSettings projectSettings{};
       AssetsBrowser assetsBrowser{};
       AssetInspector assetInspector{};

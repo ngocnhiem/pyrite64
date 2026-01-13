@@ -56,7 +56,7 @@ void Editor::AssetsBrowser::draw() {
     },
   };
 
-  ImGui::BeginChild("LEFT", ImVec2(94, 0), ImGuiChildFlags_Border);
+  ImGui::BeginChild("LEFT", ImVec2(94, 0), ImGuiChildFlags_Borders);
   for (int i=0; i<TABS.size(); ++i) {
     bool isActive = i == activeTab;
     if (ImGui::Selectable(TABS[i].name, isActive))activeTab = i;
@@ -69,7 +69,7 @@ void Editor::AssetsBrowser::draw() {
   {
     // right align
     ImGui::SameLine();
-    ImGui::BeginChild("END", ImVec2(sceneOptionsWidth, 0), ImGuiChildFlags_Border);
+    ImGui::BeginChild("END", ImVec2(sceneOptionsWidth, 0), ImGuiChildFlags_Borders);
 
     ImGui::Text("On Boot");
     ImGui::SetNextItemWidth(-FLT_MIN);

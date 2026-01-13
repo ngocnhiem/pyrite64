@@ -62,7 +62,11 @@ add_executable(p64editor src/main.cpp
         vendored/imgui/misc/cpp/imgui_stdlib.cpp
         vendored/imgui/misc/cpp/imgui_stdlib.h
 
+        # ImGuizmo
         vendored/ImGuizmo/ImGuizmo.cpp
+
+        # Imgui node editor
+        vendored/ImNodeFlow/src/ImNodeFlow.cpp
 
         # editor
         src/editor/pages/editorScene.h
@@ -182,6 +186,7 @@ add_executable(p64editor src/main.cpp
         src/build/prefabBuilder.cpp
         src/project/component/types/compConstraint.cpp
         src/project/component/types/compCulling.cpp
+        src/editor/pages/parts/nodeEditor.cpp
 )
 
 target_include_directories(p64editor PRIVATE
@@ -192,12 +197,15 @@ target_include_directories(p64editor PRIVATE
     vendored/SHA256/include
     vendored/ImGuiTextSelect
     vendored/ImViewGuizmo
+    vendored/ImNodeFlow/include
     vendored/glm
     vendored/ImGuizmo
     vendored/tiny3d/tools/gltf_importer/src/lib
     vendored/libdragon
     n64
 )
+
+target_compile_definitions(p64editor PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 
 set_target_properties(p64editor PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
 

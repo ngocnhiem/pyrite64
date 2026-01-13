@@ -350,7 +350,7 @@ void Editor::Viewport3D::draw()
         camera.velocity = camera.rot * moveDir;
       }
     } else {
-      if(!ImGui::IsKeyDown(ImGuiKey_ModCtrl))
+      if(!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
       {
         if (ImGui::IsKeyDown(ImGuiKey_G))gizmoOp = 0;
         if (ImGui::IsKeyDown(ImGuiKey_R))gizmoOp = 1;
