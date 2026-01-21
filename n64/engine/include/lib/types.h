@@ -3,14 +3,18 @@
 * @license MIT
 */
 #pragma once
-#include <libdragon.h>
+#ifndef PLATFORM_PC
+  #include <libdragon.h>
+#endif
 
 namespace P64
 {
-  template<typename T>
-  constexpr T* unached(T *ptr) {
-    return (T*)UncachedAddr(ptr);
-  }
+  #ifndef PLATFORM_PC
+    template<typename T>
+    constexpr T* unached(T *ptr) {
+      return (T*)UncachedAddr(ptr);
+    }
+  #endif
 
   consteval uint32_t crc32(const char* str, size_t len) {
     uint32_t crc = 0xFFFFFFFF;

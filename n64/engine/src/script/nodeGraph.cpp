@@ -18,6 +18,8 @@ namespace
     "VALUE",
     "REPEAT",
   };
+
+  std::unordered_map<uint32_t, P64::NodeGraph::UserFunc> userFunctionMap{};
 }
 
 namespace P64::NodeGraph
@@ -109,10 +111,23 @@ void P64::NodeGraph::Instance::update(float deltaTime) {
       }
     }break;
 
+    case NodeType::FUNC: {
+      uint32_t hash = ((uint32_t)data[0] << 16) | data[1];
+      uint32_t arg0 = ((uint32_t)data[2] << 16) | data[3];
+      auto it = userFunctionMap.find(hash);
+      assert(it != userFunctionMap.end());
+      it->second(arg0);
+    } break;
+
     default:
       debugf("Unhandled node type: %d\n", (uint8_t)currNode->type);
       break;
   }
 
   currNode = currNode->getNext(outputIndex);
+}
+
+void P64::NodeGraph::registerFunction(uint32_t strCRC32, UserFunc fn)
+{
+  userFunctionMap[strCRC32] = fn;
 }

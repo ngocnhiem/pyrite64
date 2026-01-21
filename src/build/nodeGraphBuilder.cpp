@@ -5,8 +5,6 @@
 #include "projectBuilder.h"
 #include "../utils/string.h"
 #include "../utils/fs.h"
-#include "../utils/logger.h"
-#include "../utils/proc.h"
 #include <filesystem>
 
 #include "../project/graph/graph.h"

@@ -23,6 +23,7 @@ namespace P64::NodeGraph
     COMPARE = 4,
     VALUE = 5,
     REPEAT = 6,
+    FUNC = 7,
   };
 
   struct GraphDef;
@@ -49,4 +50,8 @@ namespace P64::NodeGraph
 
       void update(float deltaTime);
   };
+
+  typedef void(*UserFunc)(uint32_t);
+
+  void registerFunction(uint32_t strCRC32, UserFunc fn);
 }

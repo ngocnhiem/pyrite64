@@ -52,7 +52,7 @@ namespace Project::Graph::Node
       }
 
       void build(Utils::BinaryFile &f, uint32_t &memOffset) override {
-        f.write<uint32_t>(0xAABBCCDD);
+        f.write<uint32_t>(Utils::Hash::crc32(funcName));
         f.write<uint32_t>(arg0);
       }
   };
