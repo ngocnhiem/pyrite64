@@ -120,6 +120,23 @@ namespace Editor::UndoRedo
     return true;
   }
 
+  bool History::beginSnapshotFromState(const std::string& before, const std::string& description)
+  {
+    auto scene = ctx.project ? ctx.project->getScenes().getLoadedScene() : nullptr;
+    if (!scene) {
+      return false;
+    }
+
+    if (snapshotDepth == 0) {
+      snapshotBefore = before;
+      snapshotDescription = description;
+      snapshotScene = scene;
+    }
+
+    ++snapshotDepth;
+    return true;
+  }
+
   bool History::endSnapshot()
   {
     if (snapshotDepth <= 0) {
@@ -163,6 +180,15 @@ namespace Editor::UndoRedo
       undoStack.erase(undoStack.begin(), undoStack.end() - maxHistorySize);
     }
     return true;
+  }
+
+  std::string History::captureSnapshotState()
+  {
+    auto scene = ctx.project ? ctx.project->getScenes().getLoadedScene() : nullptr;
+    if (!scene) {
+      return {};
+    }
+    return scene->serialize();
   }
   
   std::string History::getUndoDescription() const

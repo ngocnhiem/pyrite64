@@ -83,9 +83,19 @@ namespace Editor::UndoRedo
       bool beginSnapshot(const std::string& description);
 
       /**
+       * Begin a scene snapshot using a pre-captured state.
+       */
+      bool beginSnapshotFromState(const std::string& before, const std::string& description);
+
+      /**
        * End a scene snapshot and push to history if changed.
        */
       bool endSnapshot();
+
+      /**
+       * Capture the current scene state for snapshotting.
+       */
+      std::string captureSnapshotState();
 
       /**
        * Check if a snapshot is active.

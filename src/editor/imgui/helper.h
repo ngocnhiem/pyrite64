@@ -127,27 +127,108 @@ namespace ImTable
     ImGui::TableSetColumnIndex(1);
   }
 
-  inline void handleSnapshot(const std::string &description)
+  inline void handleSnapshot(const std::string &description, bool changed = false, const std::string *beforeState = nullptr)
   {
     if (!obj) return;
     auto &history = Editor::UndoRedo::getHistory();
-    if (ImGui::IsItemActivated()) {
-      history.beginSnapshot(description);
+    bool activated = ImGui::IsItemActivated();
+    bool deactivatedAfterEdit = ImGui::IsItemDeactivatedAfterEdit();
+    bool deactivated = ImGui::IsItemDeactivated();
+    bool clicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+    bool active = ImGui::IsItemActive();
+
+    if ((activated || clicked || changed) && !history.isSnapshotActive()) {
+      if (beforeState && !beforeState->empty()) {
+        history.beginSnapshotFromState(*beforeState, description);
+      } else {
+        history.beginSnapshot(description);
+      }
     }
-    if (ImGui::IsItemDeactivatedAfterEdit()) {
+    if (deactivatedAfterEdit) {
       history.endSnapshot();
     }
+
+    if (deactivated && !deactivatedAfterEdit && history.isSnapshotActive()) {
+      history.endSnapshot();
+    }
+
+    if (changed && !active && history.isSnapshotActive()) {
+      history.endSnapshot();
+    }
+
+  }
+
+  template<typename GetLabel, typename ApplySelection>
+  inline bool drawComboSelection(
+    const char* label,
+    int count,
+    int &current,
+    const char* preview,
+    const std::string &snapshotLabel,
+    GetLabel getLabel,
+    ApplySelection applySelection
+  ) {
+    bool changed = false;
+    if (ImGui::BeginCombo(label, preview)) {
+      for (int i = 0; i < count; ++i) {
+        bool selected = (i == current);
+        if (ImGui::Selectable(getLabel(i), selected)) {
+          if (obj) {
+            auto &history = Editor::UndoRedo::getHistory();
+            history.beginSnapshot(snapshotLabel);
+            applySelection(i);
+            history.endSnapshot();
+          } else {
+            applySelection(i);
+          }
+          current = i;
+          changed = true;
+        }
+        if (selected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+    return changed;
+  }
+
+  template<typename T, typename OnChange>
+  inline int addVecComboBox(const std::string &name, const std::vector<T> &items, auto &id, OnChange onChange)
+  {
+    add(name);
+    bool disabled  (obj && obj->isPrefabInstance() && !obj->isPrefabEdit);
+    if(disabled)ImGui::BeginDisabled();
+    int idx = 0;
+    for (const auto &item : items) {
+      if (id == item.getId())break;
+      ++idx;
+    }
+    const char* preview = "<None>";
+    if (idx >= 0 && idx < (int)items.size()) {
+      preview = items[idx].getName().c_str();
+    }
+
+    drawComboSelection(
+      ("##" + name).c_str(),
+      (int)items.size(),
+      idx,
+      preview,
+      "Edit " + name,
+      [&items](int i) { return items[i].getName().c_str(); },
+      [&items, &id, &onChange](int i) {
+        id = items[i].getId();
+        onChange(id);
+      }
+    );
+    if(disabled)ImGui::EndDisabled();
+    return idx;
   }
 
   template<typename T>
   inline int addVecComboBox(const std::string &name, const std::vector<T> &items, auto &id)
   {
-    add(name);
-    bool disabled  (obj && obj->isPrefabInstance() && !obj->isPrefabEdit);
-    if(disabled)ImGui::BeginDisabled();
-    int res = ImGui::VectorComboBox(name, items, id);
-    if(disabled)ImGui::EndDisabled();
-    return res;
+    return addVecComboBox(name, items, id, [](auto) {});
   }
 
   inline bool addComboBox(const std::string &name, int &itemCurrent, const char* const items[], int itemsCount) {
@@ -155,7 +236,16 @@ namespace ImTable
     bool disabled  (obj && obj->isPrefabInstance() && !obj->isPrefabEdit);
     auto labelHidden = "##" + name;
     if(disabled)ImGui::BeginDisabled();
-    bool res = ImGui::Combo(labelHidden.c_str(), &itemCurrent, items, itemsCount);
+    const char* preview = (itemCurrent >= 0 && itemCurrent < itemsCount) ? items[itemCurrent] : "<None>";
+    bool res = drawComboSelection(
+      labelHidden.c_str(),
+      itemsCount,
+      itemCurrent,
+      preview,
+      "Edit " + name,
+      [items](int i) { return items[i]; },
+      [&itemCurrent](int i) { itemCurrent = i; }
+    );
     if(disabled)ImGui::EndDisabled();
     return res;
   }
@@ -165,7 +255,16 @@ namespace ImTable
     bool disabled  (obj && obj->isPrefabInstance() && !obj->isPrefabEdit);
     if(disabled)ImGui::BeginDisabled();
     auto labelHidden = "##" + name;
-    ImGui::Combo(labelHidden.c_str(), &itemCurrent, items.data(), (int)items.size());
+    const char* preview = (itemCurrent >= 0 && itemCurrent < (int)items.size()) ? items[itemCurrent] : "<None>";
+    drawComboSelection(
+      labelHidden.c_str(),
+      (int)items.size(),
+      itemCurrent,
+      preview,
+      "Edit " + name,
+      [&items](int i) { return items[i]; },
+      [&itemCurrent](int i) { itemCurrent = i; }
+    );
     if(disabled)ImGui::EndDisabled();
   }
 
@@ -174,8 +273,14 @@ namespace ImTable
     bool disabled  (obj && obj->isPrefabInstance() && !obj->isPrefabEdit);
     if(disabled)ImGui::BeginDisabled();
     auto labelHidden = "##" + name;
-    ImGui::Checkbox(labelHidden.c_str(), &value);
-    if(disabled)ImGui::BeginDisabled();
+    auto &history = Editor::UndoRedo::getHistory();
+    std::string beforeState{};
+    if (!history.isSnapshotActive()) {
+      beforeState = history.captureSnapshotState();
+    }
+    bool changed = ImGui::Checkbox(labelHidden.c_str(), &value);
+    handleSnapshot("Edit " + name, changed, beforeState.empty() ? nullptr : &beforeState);
+    if(disabled)ImGui::EndDisabled();
   }
 
   inline void addBitMask8(const std::string &name, uint32_t &value)
@@ -185,15 +290,22 @@ namespace ImTable
     if(disabled)ImGui::BeginDisabled();
     auto labelHidden = "##" + name;
     // 8 checkboxes
+    auto &history = Editor::UndoRedo::getHistory();
+    std::string beforeState{};
+    if (!history.isSnapshotActive()) {
+      beforeState = history.captureSnapshotState();
+    }
     for (int i = 0; i < 8; ++i) {
       bool bit = (value & (1 << i)) != 0;
-      if (ImGui::Checkbox(labelHidden.c_str(), &bit)) {
+      bool changed = ImGui::Checkbox(labelHidden.c_str(), &bit);
+      if (changed) {
         if (bit) {
           value |= (1 << i);
         } else {
           value &= ~(1 << i);
         }
       }
+      handleSnapshot("Edit " + name, changed, beforeState.empty() ? nullptr : &beforeState);
       labelHidden += "1";
       if (i < 7)ImGui::SameLine();
     }
@@ -239,11 +351,16 @@ namespace ImTable
     if(obj && obj->isPrefabInstance() && !obj->isPrefabEdit)disabled = true;
     ImGui::PushID(name.c_str());
     if(disabled)ImGui::BeginDisabled();
-    bool res = typedInput<T>(&value);
-    handleSnapshot("Edit " + name);
+    auto &history = Editor::UndoRedo::getHistory();
+    std::string beforeState{};
+    if (!history.isSnapshotActive()) {
+      beforeState = history.captureSnapshotState();
+    }
+    bool changed = typedInput<T>(&value);
+    handleSnapshot("Edit " + name, changed, beforeState.empty() ? nullptr : &beforeState);
     if(disabled)ImGui::EndDisabled();
     ImGui::PopID();
-    return res;
+    return changed;
   }
 
   template<typename T>
@@ -251,10 +368,15 @@ namespace ImTable
   {
     add(name);
     ImGui::PushID(name.c_str());
-    bool res = typedInput<T>(&prop.value);
-    handleSnapshot("Edit " + name);
+    auto &history = Editor::UndoRedo::getHistory();
+    std::string beforeState{};
+    if (!history.isSnapshotActive()) {
+      beforeState = history.captureSnapshotState();
+    }
+    bool changed = typedInput<T>(&prop.value);
+    handleSnapshot("Edit " + name, changed, beforeState.empty() ? nullptr : &beforeState);
     ImGui::PopID();
-    return res;
+    return changed;
   }
 
   template<typename T>
@@ -326,8 +448,13 @@ namespace ImTable
       ImGui::SameLine();
     }
 
+    auto &history = Editor::UndoRedo::getHistory();
+    std::string beforeState{};
+    if (!history.isSnapshotActive()) {
+      beforeState = history.captureSnapshotState();
+    }
     res = editFunc(val);
-    handleSnapshot("Edit " + name);
+    handleSnapshot("Edit " + name, res, beforeState.empty() ? nullptr : &beforeState);
 
     if(isDisabled)ImGui::EndDisabled();
 
@@ -351,11 +478,18 @@ namespace ImTable
     add(name);
     bool disabled = (obj && obj->uuidPrefab.value);
     if(disabled)ImGui::BeginDisabled();
-    if (withAlpha) {
-      ImGui::ColorEdit4(name.c_str(), glm::value_ptr(color), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
-    } else {
-      ImGui::ColorEdit3(name.c_str(), glm::value_ptr(color), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+    auto &history = Editor::UndoRedo::getHistory();
+    std::string beforeState{};
+    if (!history.isSnapshotActive()) {
+      beforeState = history.captureSnapshotState();
     }
+    bool changed = false;
+    if (withAlpha) {
+      changed = ImGui::ColorEdit4(name.c_str(), glm::value_ptr(color), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+    } else {
+      changed = ImGui::ColorEdit3(name.c_str(), glm::value_ptr(color), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+    }
+    handleSnapshot("Edit " + name, changed, beforeState.empty() ? nullptr : &beforeState);
     if(disabled)ImGui::EndDisabled();
   }
 
@@ -371,11 +505,18 @@ namespace ImTable
     ImGui::PopID();
     ImGui::SameLine();
 
-    if (placeholder.empty()) {
-      ImGui::InputText(labelHidden.c_str(), &str);
-    } else {
-      ImGui::InputTextWithHint(labelHidden.c_str(), placeholder.c_str(), &str);
+    auto &history = Editor::UndoRedo::getHistory();
+    std::string beforeState{};
+    if (!history.isSnapshotActive()) {
+      beforeState = history.captureSnapshotState();
     }
+    bool changed = false;
+    if (placeholder.empty()) {
+      changed = ImGui::InputText(labelHidden.c_str(), &str);
+    } else {
+      changed = ImGui::InputTextWithHint(labelHidden.c_str(), placeholder.c_str(), &str);
+    }
+    handleSnapshot("Edit " + name, changed, beforeState.empty() ? nullptr : &beforeState);
   }
 
 }
