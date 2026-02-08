@@ -45,4 +45,12 @@ namespace Utils::FS
 
   uint64_t getFileAge(const std::filesystem::path &filePath);
 
+  inline std::string toUnixPath(const std::filesystem::path &path) {
+    auto res = path.string();
+    for(auto &c : res) {
+      if(c == '\\')c = '/';
+    }
+    return res;
+  }
+
 }

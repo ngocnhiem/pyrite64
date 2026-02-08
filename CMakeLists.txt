@@ -223,6 +223,8 @@ add_executable(pyrite64 src/main.cpp
         src/project/component/types/compAnimModel.cpp
         src/editor/pages/parts/createProjectOverlay.cpp
         src/editor/globalActions.cpp
+        src/editor/pages/parts/toolchainOverlay.cpp
+        src/utils/toolchain.cpp
 )
 
 target_include_directories(pyrite64 PRIVATE

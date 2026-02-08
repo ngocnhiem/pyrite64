@@ -41,7 +41,7 @@ namespace
 
   std::string getAssetROMPath(const std::string &path, const std::string &basePath)
   {
-    auto pathAbs = fs::absolute(path).string();
+    auto pathAbs = Utils::FS::toUnixPath(fs::absolute(path));
     pathAbs = pathAbs.substr(basePath.length());
     pathAbs = Utils::replaceFirst(pathAbs, "/assets/", "filesystem/");
     return pathAbs;
