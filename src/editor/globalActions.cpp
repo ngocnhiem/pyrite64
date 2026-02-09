@@ -31,7 +31,7 @@ namespace Editor::Actions
          ctx.project = nullptr;
          return false;
        }
-       return true;
+       return ctx.project != nullptr;
      });
 
     registerAction(Type::PROJECT_CLOSE, [](const std::string&) {

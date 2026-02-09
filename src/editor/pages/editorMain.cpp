@@ -166,7 +166,9 @@ void Editor::Main::draw()
           return;
         }
 
-        Actions::call(Actions::Type::PROJECT_OPEN, path);
+        if(!Actions::call(Actions::Type::PROJECT_OPEN, path)) {
+          Editor::Noti::add(Editor::Noti::ERROR, "Could not open project!");
+        }
       }, true, "Choose Project Folder");
     }
   }
