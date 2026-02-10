@@ -11,43 +11,25 @@ An N64 game-engine and editor using libdragon and tiny3d.<br>
 </p>
 
 
-## WARNING:
-**This Project is still not ready for general use!**
-
-The source code has been released since it was used and largely developed for a gamejam.
-However, the process of setting up the editor and support for windows/macos is still WIP.
-Documentation is also missing.
+> [!CAUTION]
+> **This Project is still not ready for general use!**<br>
+> The source code has been released since it was used and largely developed for a gamejam.<br>
+> However, the process of setting up the editor and support for windows/macos is still WIP.<br>
+> Documentation is also missing.
 
 Once that is done, a proper release will be made.<br>
 Sorry!
 
-Below are basic build instructions for now.
+Below are basic instructions for now.
 
 ## Documentation
 
-- [Build (Editor)](./docs/build_editor.md)
-
-### Toolchains
-
-(@TODO: auto build/install those lazily on first projectbuild)
-
-Next install libdragon and tiny3d, the two projects are already included in `/vendored` as git submodules.
-Inside libdragon run:
-```sh
-./build.sh
-```
-For tiny3d, also run:
-```sh
-./build.sh
-```
-
-## Building Games
-
-### Editor
-(@TODO write docs)
-
-### CLI
-(@TODO write docs)
+- Installation & Docs:
+  - [Pyrite64 Installation](./docs/setup_editor.md)
+  - [Using the Editor](./docs/usage_editor.md)
+  - [@TODO: CLI usage]
+- Development on the editor itself:
+  - [Build (Editor)](./docs/build_editor.md)
 
 ## Credits & License
 © 2025-2026 - Max Bebök (HailToDodongo)<br>
