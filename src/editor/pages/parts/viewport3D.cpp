@@ -165,7 +165,6 @@ Editor::Viewport3D::Viewport3D()
   gizStyle.circleRadius = 19.0f;
   gizStyle.labelSize = 1.9f;
   gizStyle.labelColor = IM_COL32(0,0,0,0xFF);
-  camera.pos = {0,220,220};
 }
 
 Editor::Viewport3D::~Viewport3D() {

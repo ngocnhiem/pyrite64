@@ -24,6 +24,7 @@ Renderer::Camera::Camera() {
     glm::radians(-180.0f),
     glm::vec3(1,0,0)
   );
+  focus(glm::vec3(0,220,0), 220);
 }
 
 void Renderer::Camera::update() {
