@@ -5,6 +5,7 @@
   - Fix issue where adding new scripts could temp. mess up asset associations during build
   - Opus audio now working
   - New ROM Inspector for asset sizes (by [@proverbiallemon](https://www.github.com/proverbiallemon), #100)
+  - Show Project state in title and ask before exiting with unsaved changes (by  [@Byterset](https://www.github.com/Byterset), #103)
 - Editor - Viewport:
   - Multi-Selection support: (by  [@Byterset](https://www.github.com/Byterset), #7)
     - Click and drag left mouse to multi-select objects
