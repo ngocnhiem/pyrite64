@@ -268,7 +268,10 @@ target_include_directories(pyrite64 PRIVATE
 
 # target_link_libraries(pyrite64 PRIVATE SDL3::SDL3)
 
+target_compile_definitions(pyrite64 PRIVATE "PYRITE_ORG_NAME=\"htd\"")
+target_compile_definitions(pyrite64 PRIVATE "PYRITE_APP_NAME=\"pyrite64\"")
 target_compile_definitions(pyrite64 PRIVATE "PYRITE_VERSION=\"${PROJECT_VERSION}\"")
+
 target_compile_definitions(pyrite64 PRIVATE IMGUI_DEFINE_MATH_OPERATORS GLM_FORCE_QUAT_DATA_XYZW)
 
 set_target_properties(pyrite64 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")

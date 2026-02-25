@@ -94,7 +94,7 @@ fs::path Utils::Proc::getDataRoot()
   }
 
   // If not found, check if the data exist in the XDG_DATA_HOME directory.
-  char* prefDir = SDL_GetPrefPath(nullptr, "pyrite64");
+  char* prefDir = SDL_GetPrefPath(PYRITE_ORG_NAME, PYRITE_APP_NAME);
   if (prefDir)
   {
     fs::path dataPath = fs::path(prefDir);
@@ -111,7 +111,16 @@ fs::path Utils::Proc::getDataRoot()
 
 fs::path Utils::Proc::getAppDataPath()
 {
-  char* prefDir = SDL_GetPrefPath("htd", "pyrite64");
+  #ifndef _WIN32
+    const char* envr = SDL_getenv("XDG_CONFIG_HOME");
+    if (envr && *envr) {
+      auto p = fs::path(envr) / PYRITE_ORG_NAME / PYRITE_APP_NAME;
+      fs::create_directories(p);
+      return p;
+    }
+  #endif
+
+  char* prefDir = SDL_GetPrefPath(PYRITE_ORG_NAME, PYRITE_APP_NAME);
   if(prefDir && *prefDir) {
     auto p = fs::path(prefDir);
     SDL_free(prefDir);
@@ -121,7 +130,7 @@ fs::path Utils::Proc::getAppDataPath()
   printf("Error: SDL_GetPrefPath() failed: %s, fallback to Documents\n", SDL_GetError());
   const char* docsPath = SDL_GetUserFolder(SDL_FOLDER_DOCUMENTS);
   if (docsPath && *docsPath) {
-    auto p = fs::path(docsPath) / "pyrite64";
+    auto p = fs::path(docsPath) / PYRITE_ORG_NAME / PYRITE_APP_NAME;
     fs::create_directories(p);
     return p;
   }

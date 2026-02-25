@@ -189,7 +189,9 @@ struct Context
       .set("keymapPreset", (uint32_t)keymapPreset)
       .set("keymap", keymap.serialize(keymapPreset))
       .toString();
-    Utils::FS::saveTextFile(getPrefsPath(), json);
+    auto prefPath = getPrefsPath();
+    printf("Saving prefs to %s\n", prefPath.c_str());
+    Utils::FS::saveTextFile(prefPath, json);
   }
 };
 
