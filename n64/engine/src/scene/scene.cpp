@@ -226,6 +226,7 @@ void P64::Scene::draw([[maybe_unused]] float deltaTime)
 
     for(int i=1; i<conf.layerSetup.layerCount3D; ++i) {
       DrawLayer::use3D(i);
+        cam->reApplyScissor();
         t3d_matrix_push_pos(1);
       DrawLayer::useDefault();
     }
