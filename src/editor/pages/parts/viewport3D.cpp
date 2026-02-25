@@ -639,8 +639,10 @@ void Editor::Viewport3D::draw()
       glm::mat4 oldGizmoMat = gizmoMat;
 
       glm::vec3 snap(10.0f);
-      if (gizmoOp == 1) {
+      if (gizmoOp == 1) { // rotate
         snap = glm::vec3(90.0f / 4.0f);
+      } else if (gizmoOp == 2) { // scale
+        snap = glm::vec3(0.125f);
       }
       bool isSnap = ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl);
       bool isOnlySelf = ImGui::IsKeyDown(ImGuiKey_LeftShift);
