@@ -1,4 +1,5 @@
 # v0.4.0
+- MacOS / Metal support (by [rasky](https://github.com/rasky), #106)
 - Runtime-Engine
   - Fix rendering issue where the camera region / scissor is not set for all draw-layers
 - Editor - General

@@ -293,8 +293,14 @@ target_link_libraries(pyrite64 PRIVATE
     SDL3::SDL3
     SDL3_image::SDL3_image
     glm::glm
-    SDL3_shadercross::SDL3_shadercross-static
 )
+
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_definitions(pyrite64 PRIVATE "HAS_SHADER_CROSS=1")
+    target_link_libraries(pyrite64 PRIVATE
+        SDL3_shadercross::SDL3_shadercross-static
+    )
+endif()
 
 if(MINGW)
     set(APP_ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/icon.rc")

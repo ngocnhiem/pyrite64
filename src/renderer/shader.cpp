@@ -9,13 +9,21 @@
 
 #include "SDL3/SDL_gpu.h"
 #include "SDL3/SDL_iostream.h"
-#include "SDL3_shadercross/SDL_shadercross.h"
+
+#ifdef HAS_SHADER_CROSS
+  #include "SDL3_shadercross/SDL_shadercross.h"
+#endif
 
 Renderer::Shader::Shader(SDL_GPUDevice* device, const Config &conf)
   : gpuDevice{device}
 {
   SDL_GPUShaderFormat backendFormats = SDL_GetGPUShaderFormats(device);
-  const SDL_GPUShaderFormat shaderCrossFormats = SDL_ShaderCross_GetSPIRVShaderFormats();
+  #ifdef HAS_SHADER_CROSS
+    const SDL_GPUShaderFormat shaderCrossFormats = SDL_ShaderCross_GetSPIRVShaderFormats();
+  #else
+    constexpr SDL_GPUShaderFormat shaderCrossFormats = 0;
+  #endif
+
   const bool supportsNativeSpirv = (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV) != 0;
   const bool supportsShaderCross = (backendFormats & shaderCrossFormats) != 0;
 
@@ -60,6 +68,7 @@ Renderer::Shader::Shader(SDL_GPUDevice* device, const Config &conf)
     fragmentInfo.num_uniform_buffers = conf.fragUboCount;
     shaderFrag = SDL_CreateGPUShader(gpuDevice, &fragmentInfo);
   } else {
+#ifdef HAS_SHADER_CROSS
     SDL_ShaderCross_SPIRV_Info vertexSpirvInfo{};
     vertexSpirvInfo.bytecode = (const Uint8*)vertexCode;
     vertexSpirvInfo.bytecode_size = vertexCodeSize;
@@ -90,6 +99,10 @@ Renderer::Shader::Shader(SDL_GPUDevice* device, const Config &conf)
     shaderFrag = SDL_ShaderCross_CompileGraphicsShaderFromSPIRV(
       device, &fragmentSpirvInfo, &fragmentResources, 0
     );
+#else
+    // this should never trigger
+    throw std::runtime_error("Shader-Cross not enabled on this platform");
+#endif
   }
 
   assert(shaderVert != nullptr);
