@@ -34,15 +34,26 @@ jobs:
           cd docs
           make html
 
-      - name: Upload built docs as artifact (for PRs)
-        if: github.event_name == 'pull_request'
+      - name: Upload docs artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sphinx-html
           path: docs/_build/html
 
+  deploy-docs:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build-docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download built docs
+        uses: actions/download-artifact@v4
+        with:
+          name: sphinx-html
+          path: docs/_build/html
+
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
