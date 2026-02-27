@@ -39,14 +39,11 @@ Emulators that are accurate enough include [Ares (v147 or newer)](https://ares-e
 
 ## Documentation
 
-Before starting, please read the [FAQ](./docs/faq.md)!
+Before starting, please read the [FAQ]([./docs/faq.md](https://hailtododongo.github.io/pyrite64/docs/faq.html))!<br>
+General documentation is available here: [Documentation](https://hailtododongo.github.io/pyrite64/)<br>
+This also contains information on how to build the editor.
 
-- Installation & Docs:
-  - [Pyrite64 Installation](./docs/setup_editor.md)
-  - [Using the Editor](./docs/usage_editor.md)
-  - [Using the CLI](./docs/usage_editor.md)
-- Development on the editor itself:
-  - [Building the Editor](./docs/build_editor.md)
+The source-code for the docs can be found in this repo under `/docs`.
 
 ## Showcase
 
