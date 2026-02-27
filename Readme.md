@@ -10,12 +10,12 @@ N64 game-engine and editor using <a href="https://github.com/DragonMinded/libdra
 <br/>
 
 <p align="center">
-  <img src="./docs/img/editor00.png" width="350">&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="./docs/img/editor02.png" width="350">
+  <img src="./docs/_static/img/editor00.png" width="350">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="./docs/_static/img/editor02.png" width="350">
 </p>
 <p align="center">
-  <img src="./docs/img/editor01.png" width="350">&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="./docs/img/editor03.jpg" width="350">
+  <img src="./docs/_static/img/editor01.png" width="350">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="./docs/_static/img/editor03.jpg" width="350">
 </p>
 
 > Note: This project does NOT use any proprietary N64 SDKs or libraries.
