@@ -64,9 +64,10 @@ Project
 Meaning of each directory
 ^^^^^^^^^
 
-| ``assets`` unsurprisingly contains things like textures, models, and audio files.
+| ``assets`` contains things like textures, models, and audio files.
 | Those are later build into optimized binary files for runtime use.
 | The editor usually also offers settings for things like compression or formats.
+| This is the place to put your own game assets in, sub-directories are also allowed.
 
 | ``data`` contains all of the data created by the editor.
 | You should not manually touch any of these files.
