@@ -47,7 +47,7 @@ Project
 ----------------
 | Finally we got the **Project** itself, which is the game you are making.
 | This is a directory containing all of your assets and scripts, as well as the scene data the editor creates.
-| The structure of it is defined and created by pyrite64, which looks like this:
+| The structure of it is defined and created by Pyrite64, which looks like this:
 
 .. code-block:: none
 
@@ -60,7 +60,7 @@ Project
   │   └── p64/
   │   └── user/
   ├── .gitignore
-  └── project.json
+  └── project.p64proj
 
 Meaning of each directory
 ^^^^^^^^^
