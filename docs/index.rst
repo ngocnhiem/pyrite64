@@ -6,7 +6,7 @@ Pyrite\ :sup:`64`
 | 
 
 .. toctree::
-  :maxdepth: 1
+  :maxdepth: 2
   :caption: Contents:
 
   docs/faq
