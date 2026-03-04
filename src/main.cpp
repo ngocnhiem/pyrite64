@@ -15,6 +15,7 @@
 #include "cli.h"
 #include "build/projectBuilder.h"
 #include "editor/actions.h"
+#include "editor/window.h"
 #include "editor/imgui/theme.h"
 #include "editor/pages/editorMain.h"
 #include "editor/pages/editorScene.h"
@@ -170,27 +171,16 @@ int main(int argc, char** argv)
   }
 #endif
 
-  // @TODO: handle actual DPI settings, or have scaling in-editor
-  float dpiScale = 1.0f;//SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-  SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-  SDL_Window* window = SDL_CreateWindow("Pyrite64 - Editor", (int)(1280 * dpiScale), (int)(800 * dpiScale), window_flags);
-  ctx.window = window;
-
-  srand(time(NULL) + SDL_GetTicks());
-
-  if(window == nullptr)
-  {
-    fatal("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+  Editor::Window editorWindow;
+  if (!editorWindow.init("Pyrite64 - Editor")) {
+    fatal("Error: Could not create window: %s\n", SDL_GetError());
     return -1;
   }
-
-  SDL_SetWindowIcon(window, IMG_Load("data/img/windowIcon.png"));
-  SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-  SDL_ShowWindow(window);
+  srand(time(NULL) + SDL_GetTicks());
 
   // Ensure text input events are enabled
   bool useTextInputFallback = false;
-  if (!SDL_StartTextInput(window)) {
+  if (!SDL_StartTextInput(ctx.window)) {
     useTextInputFallback = true;
     fprintf(stderr, "Warning: SDL_StartTextInput failed: %s\n", SDL_GetError());
   }
@@ -211,20 +201,20 @@ int main(int argc, char** argv)
   fflush(stdout);
 
   // Claim window for GPU Device
-  if (!SDL_ClaimWindowForGPUDevice(ctx.gpu, window))
+  if (!SDL_ClaimWindowForGPUDevice(ctx.gpu, ctx.window))
   {
     fatal("Error: SDL_ClaimWindowForGPUDevice(): %s\n", SDL_GetError());
     return -1;
   }
 
   SDL_GPUPresentMode presentMode = SDL_GPU_PRESENTMODE_IMMEDIATE;
-  if(!SDL_WindowSupportsGPUPresentMode(ctx.gpu, window, presentMode))
+  if(!SDL_WindowSupportsGPUPresentMode(ctx.gpu, ctx.window, presentMode))
   {
     printf("Warning: SDL_GPU_PRESENTMODE_IMMEDIATE not supported, falling back to SDL_GPU_PRESENTMODE_VSYNC\n");
     presentMode = SDL_GPU_PRESENTMODE_VSYNC;
   }
 
-  SDL_SetGPUSwapchainParameters(ctx.gpu, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
+  SDL_SetGPUSwapchainParameters(ctx.gpu, ctx.window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
 
   SDL_GPUSamplerCreateInfo samplerInfo{};
   samplerInfo.min_filter = SDL_GPU_FILTER_LINEAR;
@@ -256,10 +246,10 @@ int main(int argc, char** argv)
   ImGui::Theme::update();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplSDL3_InitForSDLGPU(window);
+  ImGui_ImplSDL3_InitForSDLGPU(ctx.window);
   ImGui_ImplSDLGPU3_InitInfo init_info = {};
   init_info.Device = ctx.gpu;
-  init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(ctx.gpu, window);
+  init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(ctx.gpu, ctx.window);
   init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;                      // Only used in multi-viewports mode.
   init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;  // Only used in multi-viewports mode.
   init_info.PresentMode = presentMode;
@@ -296,7 +286,7 @@ int main(int argc, char** argv)
         bool closeRequested = event.type == SDL_EVENT_QUIT;
         closeRequested = closeRequested || (
           event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED
-          && event.window.windowID == SDL_GetWindowID(window)
+          && event.window.windowID == SDL_GetWindowID(ctx.window)
         );
 
         if (closeRequested) {
@@ -304,6 +294,12 @@ int main(int argc, char** argv)
           if (done) {
             break;
           }
+        }
+
+        if(event.type == SDL_EVENT_WINDOW_MOVED || event.type == SDL_EVENT_WINDOW_RESIZED
+          || event.type == SDL_EVENT_WINDOW_RESTORED || event.type == SDL_EVENT_WINDOW_SHOWN)
+        {
+          editorWindow.trackGeometry();
         }
 
         // @TODO: refactor into generic actions with keybinds
@@ -356,7 +352,7 @@ int main(int argc, char** argv)
       {
         presentMode = (presentMode == SDL_GPU_PRESENTMODE_VSYNC) ? SDL_GPU_PRESENTMODE_IMMEDIATE : SDL_GPU_PRESENTMODE_VSYNC;
         printf("Switched Present Mode to: %s\n", (presentMode == SDL_GPU_PRESENTMODE_VSYNC) ? "VSync" : "Immediate");
-        SDL_SetGPUSwapchainParameters(ctx.gpu, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
+        SDL_SetGPUSwapchainParameters(ctx.gpu, ctx.window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
       }
 
       uint64_t timeTotal = SDL_GetTicksNS();
@@ -368,7 +364,7 @@ int main(int argc, char** argv)
 
       updateWindowTitle();
 
-      if(SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) {
+      if(SDL_GetWindowFlags(ctx.window) & SDL_WINDOW_MINIMIZED) {
         SDL_Delay(10);
         continue;
       }
@@ -409,15 +405,20 @@ int main(int argc, char** argv)
     ctx.editorScene.reset();
   }
 
+  editorWindow.saveState();
+
+  // needs to be destroyed before GPU teardown
+  ctx.editorScene.reset();
+
   SDL_WaitForGPUIdle(ctx.gpu);
 
   ImGui_ImplSDL3_Shutdown();
   ImGui_ImplSDLGPU3_Shutdown();
   ImGui::DestroyContext();
 
-  SDL_ReleaseWindowFromGPUDevice(ctx.gpu, window);
+  SDL_ReleaseWindowFromGPUDevice(ctx.gpu, ctx.window);
   SDL_DestroyGPUDevice(ctx.gpu);
-  SDL_DestroyWindow(window);
+  SDL_DestroyWindow(ctx.window);
 #ifdef HAS_SHADER_CROSS
   SDL_ShaderCross_Quit();
 #endif
