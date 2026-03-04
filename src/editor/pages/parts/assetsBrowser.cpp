@@ -431,9 +431,13 @@ void Editor::AssetsBrowser::draw() {
       isSelected,
       asset.conf.exclude ? 0.25f : 1.0f
     );
+    bool isDblClick = ImGui::IsMouseDoubleClicked(0) && ImGui::IsItemHovered();
 
     if (clicked) {
-      ctx.selAssetUUID = asset.getUUID() == ctx.selAssetUUID ? 0 : asset.getUUID();
+      ctx.selAssetUUID = asset.getUUID();
+    }
+    if (isDblClick) {
+      SDL_OpenURL(asset.path.c_str());
     }
 
     if (ImGui::BeginDragDropSource()) {
