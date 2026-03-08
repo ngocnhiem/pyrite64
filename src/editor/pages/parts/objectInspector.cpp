@@ -325,15 +325,17 @@ void Editor::ObjectInspector::draw() {
 
       if(srcObj->scalarScale)
       {
-        ImTable::add("Scale");
-        auto &scale = srcObj->scale.resolve(*obj);
-        if(ImGui::InputFloat("##ScaleScalar", &scale.x))
-        {
-          scale.y = scale.z = scale.x;
-          UndoRedo::getHistory().markChanged("Edit Scale");
-        }
+        std::function<bool(glm::vec3*)> cb = [](glm::vec3 *val) -> bool {
+          bool res = ImTable::typedInput<float>(&val->x);
+          val->y = val->z = val->x;
+          return res;
+        };
+        ImTable::addObjProp("Scale", srcObj->scale, cb, nullptr);
       } else {
         ImTable::addObjProp("Scale", srcObj->scale);
+
+      // icon to toggle between XYZ and scalar scale
+      ImGui::SameLine();
       }
 
       // icon to toggle between XYZ and scalar scale
