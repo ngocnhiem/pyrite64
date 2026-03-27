@@ -491,6 +491,8 @@ void Editor::AssetsBrowser::draw() {
     ImGui::EndPopup();
   }
 
+  static int ctxSceneId = -1;
+
   if(tab.showScenes)
   {
     for (const auto &scene : scenes)
@@ -518,8 +520,30 @@ void Editor::AssetsBrowser::draw() {
 
       if(ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
       {
-        ImGui::SetTooltip("Scene: %s\nID: %d", displayName.c_str(), scene.id);
+        ImGui::SetTooltip("Scene: %s\nID: %d\n\nRight-click for options", displayName.c_str(), scene.id);
       }
+
+      if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+        ctxSceneId = scene.id;
+        ImGui::OpenPopup("SceneCtxMenu");
+      }
+    }
+
+    if(ImGui::BeginPopup("SceneCtxMenu")) {
+      bool canDelete = scenes.size() > 1;
+      if(!canDelete) ImGui::BeginDisabled();
+      if(ImGui::MenuItem(ICON_MDI_TRASH_CAN_OUTLINE " Delete")) {
+        ctx.project->getScenes().remove(ctxSceneId);
+        ctx.project->conf.sceneIdLastOpened = ctx.project->getScenes().getEntries().empty()
+          ? 0 : ctx.project->getScenes().getEntries().front().id;
+        ctx.project->saveConfig();
+      }
+      if(!canDelete) {
+        if(ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+          ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
+        ImGui::EndDisabled();
+      }
+      ImGui::EndPopup();
     }
   }
 
